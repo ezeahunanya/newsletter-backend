@@ -1,0 +1,1 @@
+This repo contains all backend code needed for my newsletter.
