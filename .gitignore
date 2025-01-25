@@ -4,3 +4,6 @@
 node_modules/
 
 *lambda.zip
+
+.env*
+.python-version
