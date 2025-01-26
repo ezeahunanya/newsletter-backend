@@ -1,0 +1,141 @@
+---
+bodyClass: bg-zinc-50 dark:bg-zinc-950
+preheader: Welcome email
+---
+
+<x-main>
+  <div class="bg-zinc-50 dark:bg-zinc-950 sm:px-4 font-inter">
+    <table align="center" class="m-0 mx-auto">
+      <tr>
+        <td class="w-[576px] max-w-full">
+          <x-spacer height="24px" />
+
+          <table class="w-full">
+            <tr>
+              <td
+                class="py-6 px-9 sm:p-6 bg-white dark:bg-zinc-900 [border:0.5px_solid_theme(colors.zinc.200)] dark:[border:0.5px_solid_theme(colors.zinc.700)] rounded-lg"
+              >
+                <img
+                  src="light.jpg"
+                  src-production="images/light.jpg"
+                  class="rounded-3xl block dark:hidden mx-auto"
+                  width="70"
+                  alt="Eze's image"
+                />
+                <img
+                  src="dark.jpg"
+                  src-production="images/dark.jpg"
+                  class="rounded-3xl hidden dark:block mx-auto"
+                  width="70"
+                  alt="Eze's image"
+                />
+                <!-- Use a simple heading instead of a logo -->
+                <h2
+                  class="text-center text-lg font-semibold text-zinc-700 dark:text-zinc-300"
+                >
+                  Eze's Newsletter
+                </h2>
+
+                <x-spacer height="24px" />
+
+                <h1
+                  class="m-0 mb-6 text-base/8 text-zinc-900 dark:text-zinc-200 font-medium"
+                >
+                  Hey,
+                </h1>
+
+                <p
+                  class="m-0 mb-6 text-base/6 text-zinc-900 dark:text-zinc-200"
+                >
+                  You made it through! Let's go! I'm excited that you're joining
+                  me on this incredible journey.
+                </p>
+
+                <p
+                  class="m-0 mb-6 text-base/6 text-zinc-900 dark:text-zinc-200"
+                >
+                  My goal with this newsletter is to help you discover and align
+                  with God's plans for your life. These plans were established
+                  long before the earth's foundations, reflecting His perfect
+                  will and purpose for you. Whether you're just starting to ask
+                  questions or actively seeking direction, you're in the right
+                  place. Together, we'll explore practical steps and biblical
+                  wisdom so you can confidently walk towards your purpose.
+                </p>
+
+                <p
+                  class="m-0 mb-6 text-base/6 text-zinc-900 dark:text-zinc-200"
+                >
+                  As Proverbs 19:21 reminds us: "Many are the plans in a
+                  person's heart, but it is the Lord's purpose that prevails."
+                  Through this newsletter, I'll share insights, resources, and
+                  encouragement to help you align your life with God's purpose.
+                  I'd also love to hear from you; your story, questions, and
+                  struggles are welcome. You can reach me at
+                  <a href="mailto:contact@ezeahunanya.com" class="font-medium"
+                    >contact@ezeahunanya.com</a
+                  >.
+                </p>
+
+                <p
+                  class="m-0 mb-6 text-base/6 text-zinc-900 dark:text-zinc-200"
+                >
+                  I'm eager to join a small startup making a significant impact
+                  globally. If you could help a brother out, feel free to reach
+                  out!
+                </p>
+
+                <p
+                  class="m-0 mb-6 text-base/6 text-zinc-900 dark:text-zinc-200"
+                >
+                  Feel free to let me know your name using this link
+                  <a
+                    href="{{ complete_account_link }}"
+                    class="text-zinc-800 dark:text-zinc-300 underline"
+                    >here</a
+                  >.
+                </p>
+
+                <p
+                  class="m-0 mb-6 text-base/6 text-zinc-900 dark:text-zinc-200"
+                >
+                  Let's walk this journey together!
+                </p>
+
+                <p class="m-0 text-base/6 text-zinc-900 dark:text-zinc-200">
+                  With faith and purpose,
+                  <br />
+                  <span class="font-medium">Eze</span>
+                </p>
+
+                <x-divider />
+
+                <p
+                  class="m-0 text-xs/5 text-zinc-600 dark:text-zinc-400 mso-break-all"
+                >
+                  To manage your preferences or unsubscribe, click
+                  <a
+                    href="{{ preferences_link }}"
+                    class="text-zinc-800 dark:text-zinc-300 underline"
+                    >here</a
+                  >.
+                </p>
+              </td>
+            </tr>
+          </table>
+
+          <table class="w-full">
+            <tr>
+              <td class="py-6 px-9 sm:px-6">
+                <p class="m-0 text-xs text-zinc-500 dark:text-zinc-400">
+                  &copy; {{ new Date().getFullYear() }} Eze's Newsletter. All
+                  rights reserved.
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </div>
+</x-main>
