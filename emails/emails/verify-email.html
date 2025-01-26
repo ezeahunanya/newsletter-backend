@@ -53,7 +53,7 @@ preheader: Verify your email to start receiving updates
                 </p>
 
                 <x-button
-                  href="{{ email_verification_link }}"
+                  href="{{ verificationUrl }}"
                   class="bg-zinc-950 hover:bg-zinc-800 dark:bg-zinc-600 dark:hover:bg-zinc-500/70"
                 >
                   Verify Email
@@ -82,9 +82,9 @@ preheader: Verify your email to start receiving updates
                   If you're having trouble clicking the "Verify Email" button,
                   copy and paste the following URL into your web browser:
                   <a
-                    href="{{ email_verification_link }}"
+                    href="{{ verificationUrl }}"
                     class="text-zinc-800 dark:text-zinc-300 underline"
-                    >{{ email_verification_link }}</a
+                    >{{ verificationUrl }}</a
                   >
                 </p>
               </td>
