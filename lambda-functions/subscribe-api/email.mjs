@@ -1,6 +1,7 @@
 import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
 import nunjucks from "nunjucks";
 import path from "path";
+import { fileURLToPath } from "url";
 
 let sesClient = null;
 
@@ -11,9 +12,13 @@ const getSESClient = () => {
   return sesClient;
 };
 
+// Define __dirname manually for ES Modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 // Configure Nunjucks for rendering templates
 const configureNunjucks = () => {
-  const templatesPath = path.resolve(__dirname, "build_production/emails");
+  const templatesPath = path.resolve(__dirname, "emails");
   nunjucks.configure(templatesPath, {
     autoescape: true,
   });
