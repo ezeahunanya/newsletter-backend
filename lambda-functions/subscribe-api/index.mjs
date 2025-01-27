@@ -74,6 +74,7 @@ export const handler = async (event) => {
         event,
         tokenTableName,
         subscriberTableName,
+        configurationSet,
         frontendUrl,
       );
     }
