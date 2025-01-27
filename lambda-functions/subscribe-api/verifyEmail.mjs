@@ -33,18 +33,18 @@ export const handleVerifyEmail = async (
       const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
 
       const markVerifiedQuery = `
-      UPDATE ${subscriberTableName}
-      SET email_verified = true
-      WHERE id = $1;
-    `;
+        UPDATE ${subscriberTableName}
+        SET email_verified = true
+        WHERE id = $1;
+      `;
       await client.query(markVerifiedQuery, [user_id]);
 
       // Mark the token as used
       const markUsedQuery = `
-    UPDATE ${tokenTableName}
-    SET used = true, updated_at = NOW()
-    WHERE token_hash = $1;
-  `;
+        UPDATE ${tokenTableName}
+        SET used = true, updated_at = NOW()
+        WHERE token_hash = $1;
+      `;
       await client.query(markUsedQuery, [tokenHash]);
 
       // Generate account completion token
@@ -59,9 +59,9 @@ export const handleVerifyEmail = async (
 
       await client.query(
         `
-      INSERT INTO ${tokenTableName} (user_id, token_hash, token_type, expires_at, used, created_at, updated_at)
-      VALUES ($1, $2, 'account_completion', $3, false, NOW(), NOW());
-    `,
+        INSERT INTO ${tokenTableName} (user_id, token_hash, token_type, expires_at, used, created_at, updated_at)
+        VALUES ($1, $2, 'account_completion', $3, false, NOW(), NOW());
+      `,
         [user_id, accountCompletionHash, accountCompletionExpiresAt]
       );
 
@@ -72,9 +72,9 @@ export const handleVerifyEmail = async (
       // Insert the preferences token into the database
       await client.query(
         `
-    INSERT INTO ${tokenTableName} (user_id, token_hash, token_type, created_at, updated_at)
-    VALUES ($1, $2, 'preferences', NOW(), NOW());
-  `,
+        INSERT INTO ${tokenTableName} (user_id, token_hash, token_type, created_at, updated_at)
+        VALUES ($1, $2, 'preferences', NOW(), NOW());
+      `,
         [user_id, preferencesHash]
       );
 
