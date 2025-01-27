@@ -9,7 +9,7 @@ export const handleVerifyEmail = async (
   tokenTableName,
   subscriberTableName,
   frontendUrlBase,
-  configurationSet,
+  configurationSet
 ) => {
   const method = event.requestContext.http.method;
 
@@ -26,6 +26,7 @@ export const handleVerifyEmail = async (
       token,
       "email_verification",
       subscriberTableName,
+      { allowUsed: true }
     );
     const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
 
@@ -49,7 +50,7 @@ export const handleVerifyEmail = async (
       await generateUniqueToken(client, tokenTableName);
 
     const accountCompletionExpiresAt = new Date(
-      Date.now() + 24 * 60 * 60 * 1000,
+      Date.now() + 24 * 60 * 60 * 1000
     );
 
     await client.query(
@@ -57,7 +58,7 @@ export const handleVerifyEmail = async (
       INSERT INTO ${tokenTableName} (user_id, token_hash, token_type, expires_at, used, created_at, updated_at)
       VALUES ($1, $2, 'account_completion', $3, false, NOW(), NOW());
     `,
-      [user_id, accountCompletionHash, accountCompletionExpiresAt],
+      [user_id, accountCompletionHash, accountCompletionExpiresAt]
     );
 
     // Generate preferences token
@@ -70,7 +71,7 @@ export const handleVerifyEmail = async (
     INSERT INTO ${tokenTableName} (user_id, token_hash, token_type, created_at, updated_at)
     VALUES ($1, $2, 'preferences', NOW(), NOW());
   `,
-      [user_id, preferencesHash],
+      [user_id, preferencesHash]
     );
 
     // Send the welcome email with both URLs
@@ -80,7 +81,7 @@ export const handleVerifyEmail = async (
       email,
       accountCompletionUrl,
       configurationSet,
-      preferencesUrl,
+      preferencesUrl
     );
 
     return {

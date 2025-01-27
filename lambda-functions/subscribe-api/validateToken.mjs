@@ -7,6 +7,7 @@ export const validateToken = async (
   tokenType,
   subscriberTableName = null, // Optional parameter for subscriber table
   allowExpired = false, // New parameter to handle expired tokens
+  allowUsed = false // New parameter to handle expired tokens
 ) => {
   const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
 
@@ -31,12 +32,16 @@ export const validateToken = async (
   const { used, expires_at, ...additionalFieldsResult } = tokenResult.rows[0];
 
   if (used) {
-    if (tokenType === "email_verification") {
-      throw new Error("Email already subscribed: Token has already been used.");
-    } else if (tokenType === "account_completion") {
-      throw new Error("Name already saved: Token has already been used.");
-    } else {
-      throw new Error("Token has already been used.");
+    if (!allowUsed) {
+      if (tokenType === "email_verification") {
+        throw new Error(
+          "Email already subscribed: Token has already been used."
+        );
+      } else if (tokenType === "account_completion") {
+        throw new Error("Name already saved: Token has already been used.");
+      } else {
+        throw new Error("Token has already been used.");
+      }
     }
   }
 
