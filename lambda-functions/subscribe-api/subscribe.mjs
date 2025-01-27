@@ -7,7 +7,7 @@ export const handleSubscription = async (
   subscriberTableName,
   tokenTableName,
   frontendUrlBase,
-  configurationSet,
+  configurationSet
 ) => {
   const method = event.requestContext.http.method;
 
@@ -21,7 +21,7 @@ export const handleSubscription = async (
     try {
       const { token, tokenHash } = await generateUniqueToken(
         client,
-        tokenTableName,
+        tokenTableName
       );
 
       const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
@@ -37,7 +37,7 @@ export const handleSubscription = async (
             updates: true,
             promotions: true,
           }),
-        ],
+        ]
       );
 
       await client.query(
@@ -45,7 +45,7 @@ export const handleSubscription = async (
         INSERT INTO ${tokenTableName} (user_id, token_hash, token_type, expires_at, used, created_at, updated_at)
         VALUES ($1, $2, 'email_verification', $3, false, NOW(), NOW());
       `,
-        [userId.rows[0].id, tokenHash, expiresAt],
+        [userId.rows[0].id, tokenHash, expiresAt]
       );
 
       const verificationUrl = `${frontendUrlBase}/verify-email?token=${token}`;

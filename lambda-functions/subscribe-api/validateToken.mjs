@@ -53,6 +53,7 @@ export const validateToken = async (
   return {
     ...additionalFieldsResult,
     isExpired: new Date() > new Date(expires_at),
+    isUsed: used,
     message: "Token is valid.",
   };
 };
