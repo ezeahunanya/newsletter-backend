@@ -6,8 +6,7 @@ export const validateToken = async (
   token,
   tokenType,
   subscriberTableName = null, // Optional parameter for subscriber table
-  allowExpired = false, // New parameter to handle expired tokens
-  allowUsed = false // New parameter to handle expired tokens
+  { allowExpired = false, allowUsed = false } = {} // Destructured options
 ) => {
   const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
 
