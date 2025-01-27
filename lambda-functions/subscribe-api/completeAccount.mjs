@@ -27,7 +27,7 @@ export const handleCompleteAccount = async (
       statusCode: 200,
       body: JSON.stringify(result),
     };
-  } else if (method === "POST") {
+  } else if (method === "PUT") {
     const token = event.headers["x-token"];
     const { firstName, lastName } = JSON.parse(event.body);
 

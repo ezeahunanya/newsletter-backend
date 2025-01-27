@@ -40,7 +40,7 @@ export async function handleManagePreferences(
       statusCode: 200,
       body: JSON.stringify({ preferences }),
     };
-  } else if (method === "POST") {
+  } else if (method === "PUT") {
     const preferences = JSON.parse(event.body);
 
     if (
