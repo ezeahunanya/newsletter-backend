@@ -1,7 +1,7 @@
 import crypto from "crypto";
-import { generateUniqueToken } from "./generateUniqueToken.mjs";
-import { validateToken } from "./validateToken.mjs";
-import { sendWelcomeEmail } from "./email.mjs";
+import { generateUniqueToken } from "../db/generateUniqueToken.mjs";
+import { validateToken } from "../db/validateToken.mjs";
+import { sendWelcomeEmail } from "../email/email.mjs";
 
 export const handleVerifyEmail = async (
   client,

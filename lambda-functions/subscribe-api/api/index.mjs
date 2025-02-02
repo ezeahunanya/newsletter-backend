@@ -1,4 +1,4 @@
-import { getDbCredentials, connectToDatabase } from "./db.mjs";
+import { getDbCredentials, connectToDatabase } from "../db/db.mjs";
 import { handleSubscription } from "./subscribe.mjs";
 import { handleVerifyEmail } from "./verifyEmail.mjs";
 import { handleCompleteAccount } from "./completeAccount.mjs";
@@ -43,7 +43,7 @@ export const handler = async (event) => {
         subscriberTableName,
         tokenTableName,
         frontendUrl,
-        configurationSet,
+        configurationSet
       );
     } else if (normalizedPath === "/verify-email") {
       return await handleVerifyEmail(
@@ -52,21 +52,21 @@ export const handler = async (event) => {
         tokenTableName,
         subscriberTableName,
         frontendUrl,
-        configurationSet,
+        configurationSet
       );
     } else if (normalizedPath === "/complete-account") {
       return await handleCompleteAccount(
         client,
         event,
         tokenTableName,
-        subscriberTableName,
+        subscriberTableName
       );
     } else if (normalizedPath === "/manage-preferences") {
       return await handleManagePreferences(
         client,
         event,
         tokenTableName,
-        subscriberTableName,
+        subscriberTableName
       );
     } else if (normalizedPath === "/regenerate-token") {
       return await handleRegenerateToken(
@@ -75,7 +75,7 @@ export const handler = async (event) => {
         tokenTableName,
         subscriberTableName,
         configurationSet,
-        frontendUrl,
+        frontendUrl
       );
     }
 

@@ -1,11 +1,11 @@
 import crypto from "crypto";
-import { validateToken } from "./validateToken.mjs";
+import { validateToken } from "../db/validateToken.mjs";
 
 export const handleCompleteAccount = async (
   client,
   event,
   tokenTableName,
-  subscriberTableName,
+  subscriberTableName
 ) => {
   const method = event.requestContext.http.method;
 
@@ -20,7 +20,7 @@ export const handleCompleteAccount = async (
       client,
       tokenTableName,
       token,
-      "account_completion",
+      "account_completion"
     );
 
     return {
@@ -39,7 +39,7 @@ export const handleCompleteAccount = async (
       client,
       tokenTableName,
       token,
-      "account_completion",
+      "account_completion"
     );
 
     const updateQuery = `

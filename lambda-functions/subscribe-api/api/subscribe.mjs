@@ -1,5 +1,5 @@
-import { generateUniqueToken } from "./generateUniqueToken.mjs";
-import { sendVerificationEmail } from "./email.mjs";
+import { generateUniqueToken } from "../db/generateUniqueToken.mjs";
+import { sendVerificationEmail } from "../email/email.mjs";
 
 export const handleSubscription = async (
   client,

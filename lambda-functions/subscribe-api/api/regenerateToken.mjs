@@ -1,6 +1,6 @@
-import { validateToken } from "./validateToken.mjs";
-import { generateUniqueToken } from "./generateUniqueToken.mjs";
-import { sendRegeneratedTokenEmail } from "./email.mjs";
+import { validateToken } from "../db/validateToken.mjs";
+import { generateUniqueToken } from "../db/generateUniqueToken.mjs";
+import { sendRegeneratedTokenEmail } from "../email/email.mjs";
 
 export const handleRegenerateToken = async (
   client,
@@ -8,7 +8,7 @@ export const handleRegenerateToken = async (
   tokenTableName,
   subscriberTableName,
   configurationSet,
-  frontendUrl,
+  frontendUrl
 ) => {
   try {
     const token = event.headers["x-token"]; // Custom header for token
@@ -43,7 +43,7 @@ export const handleRegenerateToken = async (
       token,
       tokenType,
       subscriberTableName,
-      { allowExpired: true }, // Custom logic to allow expired tokens
+      { allowExpired: true } // Custom logic to allow expired tokens
     );
 
     // Generate a new token

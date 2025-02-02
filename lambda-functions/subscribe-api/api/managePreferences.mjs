@@ -1,10 +1,10 @@
-import { validateToken } from "./validateToken.mjs";
+import { validateToken } from "../db/validateToken.mjs";
 
 export async function handleManagePreferences(
   client,
   event,
   tokenTableName,
-  subscriberTableName,
+  subscriberTableName
 ) {
   const method = event.requestContext.http.method; // Check the HTTP method (GET or POST)
   const token = event.headers["x-token"];
@@ -17,7 +17,7 @@ export async function handleManagePreferences(
     client,
     tokenTableName,
     token,
-    "preferences",
+    "preferences"
   );
 
   if (method === "GET") {
@@ -48,7 +48,7 @@ export async function handleManagePreferences(
       typeof preferences.promotions === "undefined"
     ) {
       throw new Error(
-        "Both 'updates' and 'promotions' preferences must be provided.",
+        "Both 'updates' and 'promotions' preferences must be provided."
       );
     }
 
