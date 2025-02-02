@@ -1,13 +1,12 @@
 import { generateUniqueToken } from "../db/generateUniqueToken.mjs";
-import { sendVerificationEmail } from "../email/email.mjs";
+import { queueEmailJob } from "../sqs/queueEmailJob.mjs";
 
 export const handleSubscription = async (
   client,
   event,
   subscriberTableName,
   tokenTableName,
-  frontendUrlBase,
-  configurationSet
+  frontendUrlBase
 ) => {
   const method = event.requestContext.http.method;
 
@@ -49,7 +48,9 @@ export const handleSubscription = async (
       );
 
       const verificationUrl = `${frontendUrlBase}/verify-email?token=${token}`;
-      await sendVerificationEmail(email, verificationUrl, configurationSet);
+      await queueEmailJob(email, "verify-email", {
+        verificationUrl: verificationUrl,
+      });
 
       return {
         statusCode: 200,

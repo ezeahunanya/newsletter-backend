@@ -4,6 +4,7 @@ import { handleVerifyEmail } from "./verifyEmail.mjs";
 import { handleCompleteAccount } from "./completeAccount.mjs";
 import { handleManagePreferences } from "./managePreferences.mjs";
 import { handleRegenerateToken } from "./regenerateToken.mjs";
+import { processSQSMessage } from "../sqs/sqsProcessor.mjs";
 
 const {
   TABLE_NAME_DEV,
@@ -26,6 +27,11 @@ const configurationSet = isProd
 const frontendUrl = isProd ? FRONTEND_DOMAIN_URL_PROD : FRONTEND_DOMAIN_URL_DEV;
 
 export const handler = async (event) => {
+  if (event.Records) {
+    // 🔹 This is an SQS event
+    return await processSQSMessage(event, configurationSet);
+  }
+
   const stage = event.requestContext.stage; // Get the stage ('dev', 'prod', etc.)
   const rawPath = event.rawPath; // Includes the stage prefix (e.g., /dev/subscribe)
   const normalizedPath = rawPath.replace(`/${stage}`, ""); // Strip the stage prefix
@@ -42,8 +48,7 @@ export const handler = async (event) => {
         event,
         subscriberTableName,
         tokenTableName,
-        frontendUrl,
-        configurationSet
+        frontendUrl
       );
     } else if (normalizedPath === "/verify-email") {
       return await handleVerifyEmail(
@@ -51,8 +56,7 @@ export const handler = async (event) => {
         event,
         tokenTableName,
         subscriberTableName,
-        frontendUrl,
-        configurationSet
+        frontendUrl
       );
     } else if (normalizedPath === "/complete-account") {
       return await handleCompleteAccount(

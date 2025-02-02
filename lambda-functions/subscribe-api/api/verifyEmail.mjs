@@ -1,15 +1,14 @@
 import crypto from "crypto";
 import { generateUniqueToken } from "../db/generateUniqueToken.mjs";
 import { validateToken } from "../db/validateToken.mjs";
-import { sendWelcomeEmail } from "../email/email.mjs";
+import { queueEmailJob } from "../sqs/queueEmailJob.mjs";
 
 export const handleVerifyEmail = async (
   client,
   event,
   tokenTableName,
   subscriberTableName,
-  frontendUrlBase,
-  configurationSet
+  frontendUrlBase
 ) => {
   const method = event.requestContext.http.method;
 
@@ -81,12 +80,10 @@ export const handleVerifyEmail = async (
       // Send the welcome email with both URLs
       const accountCompletionUrl = `${frontendUrlBase}/complete-account?token=${accountCompletionToken}`;
       const preferencesUrl = `${frontendUrlBase}/manage-preferences?token=${preferencesToken}`;
-      await sendWelcomeEmail(
-        email,
-        accountCompletionUrl,
-        configurationSet,
-        preferencesUrl
-      );
+      await queueEmailJob(email, "welcome-email", {
+        accountCompletionUrl: accountCompletionUrl,
+        preferencesUrl: preferencesUrl,
+      });
     }
 
     return {
