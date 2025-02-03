@@ -18,8 +18,6 @@ export const processSQSMessage = async (event, configurationSet) => {
           configurationSet,
           data.preferencesUrl
         );
-
-        console.log("Welcome email sent", data);
       } else {
         throw new Error("Invalid event type");
       }

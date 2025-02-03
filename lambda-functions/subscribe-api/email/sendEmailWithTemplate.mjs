@@ -1,9 +1,23 @@
 import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
+import nodemailer from "nodemailer";
 import nunjucks from "nunjucks";
 import path from "path";
 import { fileURLToPath } from "url";
 
 let sesClient = null;
+
+// Create an SMTP transport for Outlook
+const getOutlookTransport = () => {
+  return nodemailer.createTransport({
+    host: "smtp.office365.com",
+    port: 587,
+    secure: false, // Use TLS
+    auth: {
+      user: process.env.OUTLOOK_SMTP_USER, // Outlook email address
+      pass: process.env.OUTLOOK_SMTP_PASSWORD, // App password or regular password
+    },
+  });
+};
 
 const getSESClient = () => {
   if (!sesClient) {
@@ -24,7 +38,6 @@ const configureNunjucks = () => {
   });
 };
 
-// Generic function to send emails using a Maizzle template
 export const sendEmailWithTemplate = async (
   email,
   templateName,
@@ -37,17 +50,46 @@ export const sendEmailWithTemplate = async (
   // Render email HTML using Nunjucks
   const emailHtml = nunjucks.render(`${templateName}.html`, context);
 
-  const sesClient = getSESClient();
+  const isProd = process.env.APP_STAGE === "prod"; // Check if app stage is 'prod'
 
-  const emailParams = {
-    Destination: { ToAddresses: [email] },
-    Message: {
-      Body: { Html: { Data: emailHtml } },
-      Subject: { Data: subject },
-    },
-    Source: process.env.SES_SOURCE_EMAIL,
-    ConfigurationSetName: configurationSet,
-  };
+  if (isProd) {
+    // Use Outlook SMTP in production
+    const transporter = getOutlookTransport();
 
-  await sesClient.send(new SendEmailCommand(emailParams));
+    const mailOptions = {
+      from: process.env.OUTLOOK_SMTP_USER, // From your Outlook email
+      to: email, // Recipient's email
+      subject: subject, // Email subject
+      html: emailHtml, // HTML body
+    };
+
+    try {
+      const info = await transporter.sendMail(mailOptions);
+      console.log(`Email sent via Outlook: ${info.response}`);
+    } catch (error) {
+      console.error("Error sending email via Outlook:", error);
+      throw new Error("Failed to send email via Outlook SMTP");
+    }
+  } else {
+    // Use SES in development
+    const sesClient = getSESClient();
+
+    const emailParams = {
+      Destination: { ToAddresses: [email] },
+      Message: {
+        Body: { Html: { Data: emailHtml } },
+        Subject: { Data: subject },
+      },
+      Source: process.env.SES_SOURCE_EMAIL, // Source email (SES verified)
+      ConfigurationSetName: configurationSet,
+    };
+
+    try {
+      await sesClient.send(new SendEmailCommand(emailParams));
+      console.log("Email sent via SES");
+    } catch (error) {
+      console.error("Error sending email via SES:", error);
+      throw new Error("Failed to send email via SES");
+    }
+  }
 };

@@ -18,7 +18,6 @@ const queueUrlMap = {
 export const queueEmailJob = async (email, eventType, data = {}) => {
   const queueUrl = queueUrlMap[eventType]; // Store your SQS queue URL in environment variables
   const sqsClient = getSQSClient();
-  console.log("queue url:", queueUrl)
 
   const messageBody = JSON.stringify({
     email: email,
@@ -33,7 +32,6 @@ export const queueEmailJob = async (email, eventType, data = {}) => {
 
   try {
     await sqsClient.send(new SendMessageCommand(params));
-    console.log(messageBody)
   } catch (error) {
     console.error("Error sending message to SQS", error);
     throw new Error("Failed to queue email job");
