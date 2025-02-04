@@ -1,12 +1,27 @@
 import fetch from "node-fetch";
 import { getSecret } from "../credentials/getSecret.mjs";
 
+let accessToken = null;
+let lastTokenFetchTime = 0;
+const TOKEN_EXPIRY_BUFFER = 5 * 60 * 1000; // 5 minutes buffer
+
 export const getSmtpCredentials = async () => {
   const smtpCredentials = await getSecret(process.env.SMTP_SECRET_NAME);
   return smtpCredentials;
 };
 
-export const getAccessToken = async () => {
+export const getAccessToken = async (forceRefresh = false) => {
+  const now = Date.now();
+
+  // If we already have a token and it's still valid, return it
+  if (
+    !forceRefresh &&
+    accessToken &&
+    now - lastTokenFetchTime < 3600 * 1000 - TOKEN_EXPIRY_BUFFER
+  ) {
+    return accessToken;
+  }
+
   const secrets = await getSmtpCredentials();
   const { OUTLOOK_CLIENT_SECRET, OUTLOOK_REFRESH_TOKEN } = secrets;
   const { OUTLOOK_CLIENT_ID, OUTLOOK_TENANT_ID } = process.env;
@@ -32,5 +47,7 @@ export const getAccessToken = async () => {
     throw new Error("Failed to obtain OAuth2 access token");
   }
 
-  return data.access_token;
+  accessToken = data.access_token;
+  lastTokenFetchTime = Date.now();
+  return accessToken;
 };
