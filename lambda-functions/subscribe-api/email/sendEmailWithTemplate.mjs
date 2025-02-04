@@ -45,7 +45,6 @@ export const sendEmailWithTemplate = async (
 // Function to send via Outlook and handle token expiration
 const sendEmailViaOutlook = async (email, subject, emailHtml) => {
   try {
-    console.log("Fetching Outlook OAuth2 transport...");
     const transporter = await getOutlookTransport();
 
     const mailOptions = {
@@ -55,9 +54,7 @@ const sendEmailViaOutlook = async (email, subject, emailHtml) => {
       html: emailHtml,
     };
 
-    console.log("Sending email via Outlook SMTP...");
-    const info = await transporter.sendMail(mailOptions);
-    console.log(`✅ Email sent via Outlook: ${info.response}`);
+    await transporter.sendMail(mailOptions);
   } catch (error) {
     console.error("❌ Error sending email via Outlook:", error);
 

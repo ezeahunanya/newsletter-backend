@@ -8,7 +8,6 @@ let cachedSecrets = {};
 
 export const getSecret = async (secretName) => {
   if (cachedSecrets[secretName]) {
-    console.log(`Returning cached secret for ${secretName}`);
     return cachedSecrets[secretName];
   }
 
