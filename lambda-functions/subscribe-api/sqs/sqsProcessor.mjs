@@ -1,4 +1,8 @@
-import { sendVerificationEmail, sendWelcomeEmail } from "../email/email.mjs";
+import {
+  sendVerificationEmail,
+  sendWelcomeEmail,
+  sendRegeneratedTokenEmail,
+} from "../email/email.mjs";
 
 export const processSQSMessage = async (event) => {
   for (const record of event.Records) {
@@ -13,6 +17,8 @@ export const processSQSMessage = async (event) => {
           data.accountCompletionUrl,
           data.preferencesUrl
         );
+      } else if (eventType === "regenerate-token") {
+        await sendRegeneratedTokenEmail(email, data.linkUrl, data.origin);
       } else {
         throw new Error("Invalid event type");
       }

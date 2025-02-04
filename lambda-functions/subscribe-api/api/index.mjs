@@ -11,8 +11,6 @@ const {
   TABLE_NAME_PROD,
   TOKEN_TABLE_DEV,
   TOKEN_TABLE_PROD,
-  WELCOME_CONFIGURATION_SET_DEV,
-  WELCOME_CONFIGURATION_SET_PROD,
   APP_STAGE,
   FRONTEND_DOMAIN_URL_DEV,
   FRONTEND_DOMAIN_URL_PROD,
@@ -21,9 +19,6 @@ const {
 const isProd = APP_STAGE === "prod";
 const subscriberTableName = isProd ? TABLE_NAME_PROD : TABLE_NAME_DEV;
 const tokenTableName = isProd ? TOKEN_TABLE_PROD : TOKEN_TABLE_DEV;
-const configurationSet = isProd
-  ? WELCOME_CONFIGURATION_SET_PROD
-  : WELCOME_CONFIGURATION_SET_DEV;
 const frontendUrl = isProd ? FRONTEND_DOMAIN_URL_PROD : FRONTEND_DOMAIN_URL_DEV;
 
 export const handler = async (event) => {
@@ -78,7 +73,6 @@ export const handler = async (event) => {
         event,
         tokenTableName,
         subscriberTableName,
-        configurationSet,
         frontendUrl
       );
     }

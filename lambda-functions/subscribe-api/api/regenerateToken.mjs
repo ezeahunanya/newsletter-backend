@@ -1,13 +1,12 @@
 import { validateToken } from "../db/validateToken.mjs";
 import { generateUniqueToken } from "../db/generateUniqueToken.mjs";
-import { sendRegeneratedTokenEmail } from "../email/email.mjs";
+import { queueEmailJob } from "../sqs/queueEmailJob.mjs";
 
 export const handleRegenerateToken = async (
   client,
   event,
   tokenTableName,
   subscriberTableName,
-  configurationSet,
   frontendUrl
 ) => {
   try {
@@ -59,10 +58,12 @@ export const handleRegenerateToken = async (
     await client.query(updateTokenQuery, [newTokenHash, user_id, tokenType]);
 
     // Construct the link
-    const link = `${frontendUrl}/${origin}?token=${newToken}`;
+    const linkUrl = `${frontendUrl}/${origin}?token=${newToken}`;
 
-    // Send the email with the new link
-    await sendRegeneratedTokenEmail(email, link, configurationSet, origin);
+    await queueEmailJob(email, "regenerate-token", {
+      linkUrl: linkUrl,
+      origin: origin,
+    });
 
     return {
       statusCode: 200,
