@@ -12,6 +12,7 @@
   "dependencies": {
     "@aws-sdk/client-secrets-manager": "^3.716.0",
     "@aws-sdk/client-sqs": "^3.738.0",
+    "node-fetch": "^3.3.2",
     "nodemailer": "^6.10.0",
     "nunjucks": "^3.2.4",
     "pg": "^8.13.1"

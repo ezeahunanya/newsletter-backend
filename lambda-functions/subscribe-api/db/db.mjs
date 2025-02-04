@@ -4,7 +4,7 @@ import pg from "pg";
 const { Client } = pg;
 
 export const getDbCredentials = async () => {
-  const dbCredentials = await getSecret(process.env.DB_SECRET_ARN);
+  const dbCredentials = await getSecret(process.env.DB_SECRET_NAME);
   return dbCredentials;
 };
 

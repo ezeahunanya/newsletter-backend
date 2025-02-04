@@ -1,4 +1,10 @@
 import { sendEmailWithTemplate } from "./sendEmailWithTemplate.mjs";
+import { getSecret } from "../credentials/getSecret.mjs";
+
+export const getSmtpCredentials = async () => {
+  const smtpCredentials = await getSecret(process.env.SMTP_SECRET_NAME);
+  return smtpCredentials;
+};
 
 // Verification email
 export const sendVerificationEmail = async (

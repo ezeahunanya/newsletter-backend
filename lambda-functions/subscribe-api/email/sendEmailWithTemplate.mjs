@@ -1,23 +1,10 @@
 import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
-import nodemailer from "nodemailer";
 import nunjucks from "nunjucks";
 import path from "path";
 import { fileURLToPath } from "url";
+import { getOutlookTransport } from "./getOutlookTransport.mjs";
 
 let sesClient = null;
-
-// Create an SMTP transport for Outlook
-const getOutlookTransport = () => {
-  return nodemailer.createTransport({
-    host: "smtp.office365.com",
-    port: 587,
-    secure: false, // Use TLS
-    auth: {
-      user: process.env.OUTLOOK_SMTP_USER, // Outlook email address
-      pass: process.env.OUTLOOK_SMTP_PASSWORD, // App password or regular password
-    },
-  });
-};
 
 const getSESClient = () => {
   if (!sesClient) {
@@ -26,16 +13,14 @@ const getSESClient = () => {
   return sesClient;
 };
 
-// Define __dirname manually for ES Modules
+// Define __dirname for ES Modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Configure Nunjucks for rendering templates
 const configureNunjucks = () => {
   const templatesPath = path.resolve(__dirname, "emailTemplates");
-  nunjucks.configure(templatesPath, {
-    autoescape: true,
-  });
+  nunjucks.configure(templatesPath, { autoescape: true });
 };
 
 export const sendEmailWithTemplate = async (
@@ -46,24 +31,23 @@ export const sendEmailWithTemplate = async (
   configurationSet
 ) => {
   configureNunjucks();
-
-  // Render email HTML using Nunjucks
   const emailHtml = nunjucks.render(`${templateName}.html`, context);
 
-  const isProd = process.env.APP_STAGE === "prod"; // Check if app stage is 'prod'
+  const isProd = process.env.APP_STAGE === "prod";
 
   if (isProd) {
-    // Use Outlook SMTP in production
-    const transporter = getOutlookTransport();
-
-    const mailOptions = {
-      from: process.env.OUTLOOK_SMTP_USER, // From your Outlook email
-      to: email, // Recipient's email
-      subject: subject, // Email subject
-      html: emailHtml, // HTML body
-    };
-
     try {
+      console.log("Fetching Outlook OAuth2 transport...");
+      const transporter = await getOutlookTransport();
+
+      const mailOptions = {
+        from: process.env.OUTLOOK_SMTP_SENDER,
+        to: email,
+        subject: subject,
+        html: emailHtml,
+      };
+
+      console.log("Sending email via Outlook SMTP...");
       const info = await transporter.sendMail(mailOptions);
       console.log(`Email sent via Outlook: ${info.response}`);
     } catch (error) {
@@ -71,20 +55,19 @@ export const sendEmailWithTemplate = async (
       throw new Error("Failed to send email via Outlook SMTP");
     }
   } else {
-    // Use SES in development
-    const sesClient = getSESClient();
-
-    const emailParams = {
-      Destination: { ToAddresses: [email] },
-      Message: {
-        Body: { Html: { Data: emailHtml } },
-        Subject: { Data: subject },
-      },
-      Source: process.env.SES_SOURCE_EMAIL, // Source email (SES verified)
-      ConfigurationSetName: configurationSet,
-    };
-
     try {
+      console.log("Sending email via SES...");
+      const sesClient = getSESClient();
+      const emailParams = {
+        Destination: { ToAddresses: [email] },
+        Message: {
+          Body: { Html: { Data: emailHtml } },
+          Subject: { Data: subject },
+        },
+        Source: process.env.SES_SOURCE_EMAIL,
+        ConfigurationSetName: configurationSet,
+      };
+
       await sesClient.send(new SendEmailCommand(emailParams));
       console.log("Email sent via SES");
     } catch (error) {
