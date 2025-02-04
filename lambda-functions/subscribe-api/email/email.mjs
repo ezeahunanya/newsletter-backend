@@ -7,17 +7,12 @@ export const getSmtpCredentials = async () => {
 };
 
 // Verification email
-export const sendVerificationEmail = async (
-  email,
-  verificationUrl,
-  configurationSet
-) => {
+export const sendVerificationEmail = async (email, verificationUrl) => {
   await sendEmailWithTemplate(
     email,
     "verify-email", // Template name
     { verificationUrl }, // Dynamic data for the template
-    "Verify your email", // Subject line
-    configurationSet
+    "Verify your email" // Subject line
   );
 };
 
@@ -25,25 +20,18 @@ export const sendVerificationEmail = async (
 export const sendWelcomeEmail = async (
   email,
   accountCompletionUrl,
-  configurationSet,
   preferencesUrl
 ) => {
   await sendEmailWithTemplate(
     email,
     "welcome-email", // Template name
     { accountCompletionUrl, preferencesUrl }, // Dynamic data for the template
-    "Welcome to the Community", // Subject line
-    configurationSet
+    "Welcome to the Community" // Subject line
   );
 };
 
 // Regenerated token email
-export const sendRegeneratedTokenEmail = async (
-  email,
-  link,
-  configurationSet,
-  origin
-) => {
+export const sendRegeneratedTokenEmail = async (email, link, origin) => {
   // Define template name and subject dynamically based on the origin
   const templateName =
     origin === "verify-email"
@@ -59,7 +47,6 @@ export const sendRegeneratedTokenEmail = async (
     email,
     templateName, // Template name based on origin
     { link }, // Dynamic data for the template
-    subject, // Subject line based on origin
-    configurationSet
+    subject // Subject line based on origin
   );
 };

@@ -1,21 +1,16 @@
 import { sendVerificationEmail, sendWelcomeEmail } from "../email/email.mjs";
 
-export const processSQSMessage = async (event, configurationSet) => {
+export const processSQSMessage = async (event) => {
   for (const record of event.Records) {
     const { email, eventType, data } = JSON.parse(record.body);
 
     try {
       if (eventType === "verify-email") {
-        await sendVerificationEmail(
-          email,
-          data.verificationUrl,
-          configurationSet
-        );
+        await sendVerificationEmail(email, data.verificationUrl);
       } else if (eventType === "welcome-email") {
         await sendWelcomeEmail(
           email,
           data.accountCompletionUrl,
-          configurationSet,
           data.preferencesUrl
         );
       } else {

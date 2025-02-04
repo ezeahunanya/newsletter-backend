@@ -29,7 +29,7 @@ const frontendUrl = isProd ? FRONTEND_DOMAIN_URL_PROD : FRONTEND_DOMAIN_URL_DEV;
 export const handler = async (event) => {
   if (event.Records) {
     // 🔹 This is an SQS event
-    return await processSQSMessage(event, configurationSet);
+    return await processSQSMessage(event);
   }
 
   const stage = event.requestContext.stage; // Get the stage ('dev', 'prod', etc.)

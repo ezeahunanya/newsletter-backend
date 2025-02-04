@@ -27,8 +27,7 @@ export const sendEmailWithTemplate = async (
   email,
   templateName,
   context,
-  subject,
-  configurationSet
+  subject
 ) => {
   configureNunjucks();
   const emailHtml = nunjucks.render(`${templateName}.html`, context);
@@ -65,7 +64,6 @@ export const sendEmailWithTemplate = async (
           Subject: { Data: subject },
         },
         Source: process.env.SES_SOURCE_EMAIL,
-        ConfigurationSetName: configurationSet,
       };
 
       await sesClient.send(new SendEmailCommand(emailParams));
