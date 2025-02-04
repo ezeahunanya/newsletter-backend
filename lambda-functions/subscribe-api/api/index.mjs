@@ -6,21 +6,6 @@ import { handleManagePreferences } from "./managePreferences.mjs";
 import { handleRegenerateToken } from "./regenerateToken.mjs";
 import { processSQSMessage } from "../sqs/sqsProcessor.mjs";
 
-const {
-  TABLE_NAME_DEV,
-  TABLE_NAME_PROD,
-  TOKEN_TABLE_DEV,
-  TOKEN_TABLE_PROD,
-  APP_STAGE,
-  FRONTEND_DOMAIN_URL_DEV,
-  FRONTEND_DOMAIN_URL_PROD,
-} = process.env;
-
-const isProd = APP_STAGE === "prod";
-const subscriberTableName = isProd ? TABLE_NAME_PROD : TABLE_NAME_DEV;
-const tokenTableName = isProd ? TOKEN_TABLE_PROD : TOKEN_TABLE_DEV;
-const frontendUrl = isProd ? FRONTEND_DOMAIN_URL_PROD : FRONTEND_DOMAIN_URL_DEV;
-
 export const handler = async (event) => {
   if (event.Records) {
     // 🔹 This is an SQS event
@@ -38,43 +23,15 @@ export const handler = async (event) => {
     client = await connectToDatabase(dbCredentials);
 
     if (normalizedPath === "/subscribe") {
-      return await handleSubscription(
-        client,
-        event,
-        subscriberTableName,
-        tokenTableName,
-        frontendUrl
-      );
+      return await handleSubscription(client, event);
     } else if (normalizedPath === "/verify-email") {
-      return await handleVerifyEmail(
-        client,
-        event,
-        tokenTableName,
-        subscriberTableName,
-        frontendUrl
-      );
+      return await handleVerifyEmail(client, event);
     } else if (normalizedPath === "/complete-account") {
-      return await handleCompleteAccount(
-        client,
-        event,
-        tokenTableName,
-        subscriberTableName
-      );
+      return await handleCompleteAccount(client, event);
     } else if (normalizedPath === "/manage-preferences") {
-      return await handleManagePreferences(
-        client,
-        event,
-        tokenTableName,
-        subscriberTableName
-      );
+      return await handleManagePreferences(client, event);
     } else if (normalizedPath === "/regenerate-token") {
-      return await handleRegenerateToken(
-        client,
-        event,
-        tokenTableName,
-        subscriberTableName,
-        frontendUrl
-      );
+      return await handleRegenerateToken(client, event);
     }
 
     return {

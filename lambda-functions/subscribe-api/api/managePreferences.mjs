@@ -1,11 +1,6 @@
 import { validateToken } from "../db/validateToken.mjs";
 
-export async function handleManagePreferences(
-  client,
-  event,
-  tokenTableName,
-  subscriberTableName
-) {
+export async function handleManagePreferences(client, event) {
   const method = event.requestContext.http.method; // Check the HTTP method (GET or POST)
   const token = event.headers["x-token"];
 
@@ -13,17 +8,12 @@ export async function handleManagePreferences(
     throw new Error("Token is required.");
   }
 
-  const { user_id } = await validateToken(
-    client,
-    tokenTableName,
-    token,
-    "preferences"
-  );
+  const { user_id } = await validateToken(client, token, "preferences");
 
   if (method === "GET") {
     const query = `
       SELECT preferences
-      FROM ${subscriberTableName}
+      FROM ${process.env.SUBSCRIBERS_TABLE_NAME}
       WHERE id = $1;
     `;
     const result = await client.query(query, [user_id]);
@@ -61,7 +51,7 @@ export async function handleManagePreferences(
     if (!updatedPreferences.updates && !updatedPreferences.promotions) {
       // Unsubscribe from all
       const updateQuery = `
-        UPDATE ${subscriberTableName}
+        UPDATE ${process.env.SUBSCRIBERS_TABLE_NAME}
         SET subscribed = false,
             unsubscribed_at = NOW(),
             preferences = $1
@@ -79,7 +69,7 @@ export async function handleManagePreferences(
       // Update preferences and subscribe if needed
       const newPreferences = JSON.stringify(updatedPreferences);
       const updateQuery = `
-        UPDATE ${subscriberTableName}
+        UPDATE ${process.env.SUBSCRIBERS_TABLE_NAME}
         SET preferences = $1,
             subscribed = true,
             unsubscribed_at = NULL

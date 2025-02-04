@@ -1,12 +1,7 @@
 import crypto from "crypto";
 import { validateToken } from "../db/validateToken.mjs";
 
-export const handleCompleteAccount = async (
-  client,
-  event,
-  tokenTableName,
-  subscriberTableName
-) => {
+export const handleCompleteAccount = async (client, event) => {
   const method = event.requestContext.http.method;
 
   if (method === "GET") {
@@ -16,12 +11,7 @@ export const handleCompleteAccount = async (
       throw new Error("Token is required.");
     }
 
-    const result = await validateToken(
-      client,
-      tokenTableName,
-      token,
-      "account_completion"
-    );
+    const result = await validateToken(client, token, "account_completion");
 
     return {
       statusCode: 200,
@@ -37,13 +27,12 @@ export const handleCompleteAccount = async (
 
     const { user_id } = await validateToken(
       client,
-      tokenTableName,
       token,
       "account_completion"
     );
 
     const updateQuery = `
-      UPDATE ${subscriberTableName}
+      UPDATE ${process.env.SUBSCRIBERS_TABLE_NAME}
       SET first_name = $1, last_name = $2
       WHERE id = $3;
     `;
@@ -51,7 +40,7 @@ export const handleCompleteAccount = async (
 
     const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
     const markUsedQuery = `
-    UPDATE ${tokenTableName}
+    UPDATE ${process.env.TOKEN_TABLE_NAME}
     SET used = true, updated_at = NOW()
     WHERE token_hash = $1;
   `;

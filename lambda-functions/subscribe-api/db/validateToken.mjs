@@ -2,7 +2,6 @@ import crypto from "crypto";
 
 export const validateToken = async (
   client,
-  tokenTableName,
   token,
   tokenType,
   subscriberTableName = null, // Optional parameter for subscriber table
@@ -18,7 +17,7 @@ export const validateToken = async (
 
   const tokenQuery = `
     SELECT t.user_id, t.used, t.expires_at${additionalFields}
-    FROM ${tokenTableName} t
+    FROM ${process.env.TOKEN_TABLE_NAME} t
     ${joinClause}
     WHERE t.token_hash = $1 AND t.token_type = $2;
   `;

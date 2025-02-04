@@ -1,13 +1,7 @@
 import { generateUniqueToken } from "../db/generateUniqueToken.mjs";
 import { queueEmailJob } from "../sqs/queueEmailJob.mjs";
 
-export const handleSubscription = async (
-  client,
-  event,
-  subscriberTableName,
-  tokenTableName,
-  frontendUrlBase
-) => {
+export const handleSubscription = async (client, event) => {
   const method = event.requestContext.http.method;
 
   if (method === "POST") {
@@ -18,16 +12,13 @@ export const handleSubscription = async (
     }
 
     try {
-      const { token, tokenHash } = await generateUniqueToken(
-        client,
-        tokenTableName
-      );
+      const { token, tokenHash } = await generateUniqueToken(client);
 
       const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
       const userId = await client.query(
         `
-        INSERT INTO ${subscriberTableName} (email, subscribed, subscribed_at, email_verified, preferences)
+        INSERT INTO ${process.env.SUBSCRIBERS_TABLE_NAME} (email, subscribed, subscribed_at, email_verified, preferences)
         VALUES ($1, true, NOW(), false, $2) RETURNING id;
       `,
         [
@@ -41,13 +32,13 @@ export const handleSubscription = async (
 
       await client.query(
         `
-        INSERT INTO ${tokenTableName} (user_id, token_hash, token_type, expires_at, used, created_at, updated_at)
+        INSERT INTO ${process.env.TOKEN_TABLE_NAME} (user_id, token_hash, token_type, expires_at, used, created_at, updated_at)
         VALUES ($1, $2, 'email_verification', $3, false, NOW(), NOW());
       `,
         [userId.rows[0].id, tokenHash, expiresAt]
       );
 
-      const verificationUrl = `${frontendUrlBase}/verify-email?token=${token}`;
+      const verificationUrl = `${process.env.FRONTEND_DOMAIN_URL}/verify-email?token=${token}`;
       await queueEmailJob(email, "verify-email", {
         verificationUrl: verificationUrl,
       });

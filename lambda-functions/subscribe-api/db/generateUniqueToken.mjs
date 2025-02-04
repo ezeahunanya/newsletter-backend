@@ -12,7 +12,7 @@ import crypto from "crypto";
 export const generateUniqueToken = async (
   client,
   tokenTableName,
-  maxRetries = 5,
+  maxRetries = 5
 ) => {
   let retries = 0;
   let token, tokenHash, isUnique;
@@ -20,7 +20,7 @@ export const generateUniqueToken = async (
   do {
     if (retries >= maxRetries) {
       throw new Error(
-        "Failed to generate a unique token after multiple attempts.",
+        "Failed to generate a unique token after multiple attempts."
       );
     }
 
@@ -28,7 +28,7 @@ export const generateUniqueToken = async (
     tokenHash = crypto.createHash("sha256").update(token).digest("hex");
 
     const tokenCheckQuery = `
-      SELECT 1 FROM ${tokenTableName} WHERE token_hash = $1;
+      SELECT 1 FROM ${process.env.TOKEN_TABLE_NAME} WHERE token_hash = $1;
     `;
     const tokenCheckResult = await client.query(tokenCheckQuery, [tokenHash]);
 
