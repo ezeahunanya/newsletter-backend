@@ -3,7 +3,7 @@
 # dependencies
 node_modules/
 
-*lambda.zip
+*.zip
 
 .env*
 .python-version
