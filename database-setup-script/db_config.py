@@ -54,8 +54,14 @@ def define_tokens_table(name, metadata, subscriber_table_name=None, **kwargs):
             ForeignKey(f"{subscriber_table_name}.id"),
             nullable=False,
         ),
+        Column(
+            "token_type", String(50), nullable=False
+        ),  # e.g., 'email_verification', 'preferences'
+        # Hash for email verification & name completion
         Column("token_hash", String(255), nullable=False, index=True, unique=True),
-        Column("token_type", String(50), nullable=False),
+        # Encrypted token for preferences
+        Column("encrypted_token", String(512), nullable=True, unique=True),
+        Column("iv", String(32), nullable=True),  # IV for AES decryption
         Column("expires_at", DateTime, nullable=True),
         Column("used", Boolean, nullable=True),
         Column("created_at", DateTime, default=func.now(), nullable=False),
