@@ -22,10 +22,13 @@ export const getAccessToken = async (forceRefresh = false) => {
     return accessToken;
   }
 
-  const secrets = await getSmtpCredentials();
-  const { OUTLOOK_CLIENT_SECRET, OUTLOOK_REFRESH_TOKEN } = secrets;
-  const { OUTLOOK_CLIENT_ID, OUTLOOK_TENANT_ID } = process.env;
-
+  const smtpSecrets = await getSmtpCredentials();
+  const {
+    OUTLOOK_CLIENT_SECRET,
+    OUTLOOK_REFRESH_TOKEN,
+    OUTLOOK_CLIENT_ID,
+    OUTLOOK_TENANT_ID,
+  } = smtpSecrets;
   const response = await fetch(
     `https://login.microsoftonline.com/${OUTLOOK_TENANT_ID}/oauth2/v2.0/token`,
     {
