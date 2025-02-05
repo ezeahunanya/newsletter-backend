@@ -61,7 +61,6 @@ def define_tokens_table(name, metadata, subscriber_table_name=None, **kwargs):
         Column("token_hash", String(255), nullable=False, index=True, unique=True),
         # Encrypted token for preferences
         Column("encrypted_token", String(512), nullable=True, unique=True),
-        Column("iv", String(32), nullable=True),  # IV for AES decryption
         Column("expires_at", DateTime, nullable=True),
         Column("used", Boolean, nullable=True),
         Column("created_at", DateTime, default=func.now(), nullable=False),
