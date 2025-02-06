@@ -10,6 +10,7 @@ import { handleRegenerateToken } from "./regenerateToken.mjs";
 import { processSQSMessage } from "../sqs/sqsProcessor.mjs";
 
 export const handler = async (event) => {
+  let client;
   try {
     if (event.Records) {
       // 🔹 This is an SQS event
@@ -19,8 +20,6 @@ export const handler = async (event) => {
     const stage = event.requestContext.stage; // Get the stage ('dev', 'prod', etc.)
     const rawPath = event.rawPath; // Includes the stage prefix (e.g., /dev/subscribe)
     const normalizedPath = rawPath.replace(`/${stage}`, ""); // Strip the stage prefix
-
-    let client;
 
     const dbCredentials = await getDbCredentials();
     client = await connectToDatabase(dbCredentials);
@@ -45,7 +44,7 @@ export const handler = async (event) => {
     console.error(error);
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: error.message }),
+      body: JSON.stringify({ error: "Internal Server Error" }),
     };
   } finally {
     if (client) {
