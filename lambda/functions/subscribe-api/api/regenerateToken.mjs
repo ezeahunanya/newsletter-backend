@@ -1,6 +1,6 @@
 import { validateToken } from "../db/validateToken.mjs";
 import { generateUniqueToken } from "../db/generateUniqueToken.mjs";
-import { queueEmailJob, queueUrlMap } from "/opt/shared/queueEmailJob.mjs";
+import { queueEmailJob } from "/opt/shared/queueEmailJob.mjs";
 
 export const handleRegenerateToken = async (client, event) => {
   console.log("Received request to regenerate token.");
@@ -69,12 +69,10 @@ export const handleRegenerateToken = async (client, event) => {
 
     // Construct the link
     const linkUrl = `${process.env.FRONTEND_DOMAIN_URL}/${origin}?token=${newToken}`;
-    console.log(`Generated link URL: ${linkUrl}`);
 
-    const queueUrl = queueUrlMap["regenerate-token"];
     console.log(`Queuing email job for ${email} to ${queueUrl}...`);
 
-    await queueEmailJob(queueUrl, email, {
+    await queueEmailJob("regenerate-token", email, {
       linkUrl: linkUrl,
       origin: origin,
     });
