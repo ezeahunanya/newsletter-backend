@@ -10,18 +10,18 @@ import { handleRegenerateToken } from "./regenerateToken.mjs";
 import { processSQSMessage } from "../sqs/sqsProcessor.mjs";
 
 export const handler = async (event) => {
-  if (event.Records) {
-    // 🔹 This is an SQS event
-    return await processSQSMessage(event);
-  }
-
-  const stage = event.requestContext.stage; // Get the stage ('dev', 'prod', etc.)
-  const rawPath = event.rawPath; // Includes the stage prefix (e.g., /dev/subscribe)
-  const normalizedPath = rawPath.replace(`/${stage}`, ""); // Strip the stage prefix
-
-  let client;
-
   try {
+    if (event.Records) {
+      // 🔹 This is an SQS event
+      return await processSQSMessage(event);
+    }
+
+    const stage = event.requestContext.stage; // Get the stage ('dev', 'prod', etc.)
+    const rawPath = event.rawPath; // Includes the stage prefix (e.g., /dev/subscribe)
+    const normalizedPath = rawPath.replace(`/${stage}`, ""); // Strip the stage prefix
+
+    let client;
+
     const dbCredentials = await getDbCredentials();
     client = await connectToDatabase(dbCredentials);
 
