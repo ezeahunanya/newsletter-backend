@@ -43,14 +43,6 @@ export const handler = async (event) => {
     };
   } catch (error) {
     console.error(error);
-
-    if (error.message === "This email is already subscribed.") {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ error: "This email is already subscribed." }),
-      };
-    }
-
     return {
       statusCode: 500,
       body: JSON.stringify({ error: error.message }),
