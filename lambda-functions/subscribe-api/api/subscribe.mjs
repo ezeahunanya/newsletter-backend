@@ -1,5 +1,5 @@
 import { generateUniqueToken } from "../db/generateUniqueToken.mjs";
-import { queueEmailJob } from "../sqs/queueEmailJob.mjs";
+import { queueEmailJob, queueUrlMap } from "../sqs/queueEmailJob.mjs";
 
 export const handleSubscription = async (client, event) => {
   const method = event.requestContext.http.method;
@@ -39,7 +39,9 @@ export const handleSubscription = async (client, event) => {
       );
 
       const verificationUrl = `${process.env.FRONTEND_DOMAIN_URL}/verify-email?token=${token}`;
-      await queueEmailJob(email, "verify-email", {
+      const queueUrl = queueUrlMap["verify-email"];
+
+      await queueEmailJob(queueUrl, email, {
         verificationUrl: verificationUrl,
       });
 

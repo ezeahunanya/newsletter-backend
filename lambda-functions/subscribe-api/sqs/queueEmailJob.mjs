@@ -10,31 +10,32 @@ const getSQSClient = () => {
 };
 
 // 🔹 Define queue URLs based on event types
-const queueUrlMap = {
+export const queueUrlMap = {
   "verify-email": process.env.VERIFY_EMAIL_QUEUE_URL,
   "welcome-email": process.env.WELCOME_EMAIL_QUEUE_URL,
   "regenerate-token": process.env.VERIFY_EMAIL_QUEUE_URL,
 };
 
-export const queueEmailJob = async (email, eventType, data = {}) => {
-  const queueUrl = queueUrlMap[eventType]; // Store your SQS queue URL in environment variables
-  const sqsClient = getSQSClient();
+/**
+ * Queues an email job in SQS
+ * @param {string} queueUrl - The URL of the SQS queue
+ * @param {string} email - Recipient email
+ * @param {object} data - Email data (subject, template, links, etc.)
+ */
 
+export const queueEmailJob = async (queueUrl, email, data = {}) => {
+  if (!queueUrl) {
+    throw new Error(`❌ No queue URL provided`);
+  }
+
+  const sqsClient = getSQSClient();
   const messageBody = JSON.stringify({
-    email: email,
-    eventType: eventType, // e.g., "verify-email" or "welcome-email"
-    data: data, // Pass dynamic data (e.g., links, names, etc.)
+    email,
+    data,
   });
 
-  const params = {
-    QueueUrl: queueUrl,
-    MessageBody: messageBody,
-  };
-
-  try {
-    await sqsClient.send(new SendMessageCommand(params));
-  } catch (error) {
-    console.error("Error sending message to SQS", error);
-    throw new Error("Failed to queue email job");
-  }
+  await sqsClient.send(
+    new SendMessageCommand({ QueueUrl: queueUrl, MessageBody: messageBody })
+  );
+  console.log(`✅ Queued email job for ${email} to ${queueUrl}`);
 };

@@ -1,7 +1,7 @@
 import crypto from "crypto";
 import { generateUniqueToken } from "../db/generateUniqueToken.mjs";
 import { validateToken } from "../db/validateToken.mjs";
-import { queueEmailJob } from "../sqs/queueEmailJob.mjs";
+import { queueEmailJob, queueUrlMap } from "../sqs/queueEmailJob.mjs";
 import { getSecret } from "../credentials/getSecret.mjs";
 
 export const getEncryptionKey = async () => {
@@ -114,8 +114,9 @@ export const handleVerifyEmail = async (client, event) => {
       // Send the welcome email with both URLs
       const accountCompletionUrl = `${process.env.FRONTEND_DOMAIN_URL}/complete-account?token=${accountCompletionToken}`;
       const preferencesUrl = `${process.env.FRONTEND_DOMAIN_URL}/manage-preferences?token=${preferencesToken}`;
+      const queueUrl = queueUrlMap["welcome-email"];
 
-      await queueEmailJob(email, "welcome-email", {
+      await queueEmailJob(queueUrl, email, {
         accountCompletionUrl: accountCompletionUrl,
         preferencesUrl: preferencesUrl,
       });
