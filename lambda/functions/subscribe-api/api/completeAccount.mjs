@@ -110,7 +110,7 @@ export const handleCompleteAccount = async (client, event) => {
     console.error("❌ Error handling account completion:", error);
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: "Internal Server Error" }),
+      body: JSON.stringify({ error: error.message }),
     };
   }
 };
