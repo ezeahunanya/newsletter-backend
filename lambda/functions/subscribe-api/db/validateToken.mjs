@@ -7,6 +7,8 @@ export const validateToken = async (
   subscriberTableName = null, // Optional parameter for subscriber table
   { allowExpired = false, allowUsed = false } = {} // Destructured options
 ) => {
+  console.log(`Starting token validation for token type: ${tokenType}`);
+
   const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
 
   const joinClause = subscriberTableName
@@ -21,15 +23,24 @@ export const validateToken = async (
     ${joinClause}
     WHERE t.token_hash = $1 AND t.token_type = $2;
   `;
+
+  console.log(`Executing token query for token hash: ${tokenHash}`);
+
   const tokenResult = await client.query(tokenQuery, [tokenHash, tokenType]);
 
   if (tokenResult.rows.length === 0) {
+    console.error(
+      "❌ Token validation failed: Invalid token or user not found."
+    );
     throw new Error("User not found: Invalid token.");
   }
 
   const { used, expires_at, ...additionalFieldsResult } = tokenResult.rows[0];
 
+  console.log(`✅ Token validation successful. Token type: ${tokenType}`);
+
   if (used) {
+    console.warn("⚠️ Token is already used.");
     if (!allowUsed) {
       if (tokenType === "email_verification") {
         throw new Error(
@@ -45,10 +56,14 @@ export const validateToken = async (
 
   if (tokenType !== "preferences") {
     if (!allowExpired && new Date() > new Date(expires_at)) {
+      console.warn("⚠️ Token has expired.");
       throw new Error("Token has expired.");
     }
   }
 
+  console.log(
+    `✅ Token is valid for user ID: ${additionalFieldsResult.user_id}`
+  );
   return {
     ...additionalFieldsResult,
     isExpired: new Date() > new Date(expires_at),

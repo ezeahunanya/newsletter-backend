@@ -17,8 +17,13 @@ export const generateUniqueToken = async (
   let retries = 0;
   let token, tokenHash, isUnique;
 
+  console.log("Attempting to generate a unique token...");
+
   do {
     if (retries >= maxRetries) {
+      console.error(
+        `❌ Failed to generate a unique token after ${retries} attempts.`
+      );
       throw new Error(
         "Failed to generate a unique token after multiple attempts."
       );
@@ -27,6 +32,8 @@ export const generateUniqueToken = async (
     token = crypto.randomBytes(32).toString("hex");
     tokenHash = crypto.createHash("sha256").update(token).digest("hex");
 
+    console.log(`Retry ${retries + 1}: Checking if token is unique...`);
+
     const tokenCheckQuery = `
       SELECT 1 FROM ${process.env.TOKEN_TABLE_NAME} WHERE token_hash = $1;
     `;
@@ -34,7 +41,12 @@ export const generateUniqueToken = async (
 
     isUnique = tokenCheckResult.rows.length === 0;
     retries++;
+
+    if (isUnique) {
+      console.log(`✅ Token is unique after ${retries} retries.`);
+    }
   } while (!isUnique);
 
+  console.log("✅ Successfully generated a unique token.");
   return { token, tokenHash };
 };

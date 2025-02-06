@@ -4,6 +4,7 @@ let sqsClient = null;
 
 const getSQSClient = () => {
   if (!sqsClient) {
+    console.log("Initializing new SQS client...");
     sqsClient = new SQSClient({ region: process.env.AWS_REGION });
   }
   return sqsClient;
@@ -25,8 +26,16 @@ export const queueUrlMap = {
 
 export const queueEmailJob = async (queueUrl, email, data = {}) => {
   if (!queueUrl) {
-    throw new Error(`❌ No queue URL provided`);
+    console.error("❌ No queue URL provided for email job.");
+    throw new Error("No queue URL provided");
   }
+
+  if (!email) {
+    console.error("❌ No email provided for email job.");
+    throw new Error("No email provided");
+  }
+
+  console.log(`Queuing email job for ${email} to ${queueUrl}...`);
 
   const sqsClient = getSQSClient();
   const messageBody = JSON.stringify({
@@ -34,8 +43,13 @@ export const queueEmailJob = async (queueUrl, email, data = {}) => {
     data,
   });
 
-  await sqsClient.send(
-    new SendMessageCommand({ QueueUrl: queueUrl, MessageBody: messageBody })
-  );
-  console.log(`✅ Queued email job for ${email} to ${queueUrl}`);
+  try {
+    await sqsClient.send(
+      new SendMessageCommand({ QueueUrl: queueUrl, MessageBody: messageBody })
+    );
+    console.log(`✅ Successfully queued email job for ${email} to ${queueUrl}`);
+  } catch (error) {
+    console.error(`❌ Failed to queue email job for ${email}:`, error);
+    throw new Error("Failed to queue email job");
+  }
 };

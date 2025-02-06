@@ -20,8 +20,10 @@ const __dirname = path.dirname(__filename);
 
 // Configure Nunjucks for rendering templates
 const configureNunjucks = () => {
+  console.log("Configuring Nunjucks with email templates path...");
   const templatesPath = path.resolve(__dirname, "emailTemplates");
   nunjucks.configure(templatesPath, { autoescape: true });
+  console.log("✅ Nunjucks configured successfully.");
 };
 
 export const sendEmailWithTemplate = async (
@@ -30,14 +32,17 @@ export const sendEmailWithTemplate = async (
   context,
   subject
 ) => {
+  console.log(`Rendering email template: ${templateName} for ${email}...`);
   configureNunjucks();
   const emailHtml = nunjucks.render(`${templateName}.html`, context);
 
   const isProd = process.env.APP_STAGE === "prod";
 
   if (isProd) {
+    console.log("Sending email via Outlook (Production)...");
     return await sendEmailViaOutlook(email, subject, emailHtml);
   } else {
+    console.log("Sending email via SES (Non-production)...");
     return await sendEmailViaSES(email, subject, emailHtml);
   }
 };
@@ -45,6 +50,7 @@ export const sendEmailWithTemplate = async (
 // Function to send via Outlook and handle token expiration
 const sendEmailViaOutlook = async (email, subject, emailHtml) => {
   try {
+    console.log(`Preparing to send email via Outlook to ${email}...`);
     const transporter = await getOutlookTransport();
 
     const mailOptions = {
@@ -55,6 +61,7 @@ const sendEmailViaOutlook = async (email, subject, emailHtml) => {
     };
 
     await transporter.sendMail(mailOptions);
+    console.log(`✅ Email successfully sent to ${email} via Outlook.`);
   } catch (error) {
     console.error("❌ Error sending email via Outlook:", error);
 
@@ -76,7 +83,7 @@ const sendEmailViaOutlook = async (email, subject, emailHtml) => {
 // Function to send via AWS SES
 const sendEmailViaSES = async (email, subject, emailHtml) => {
   try {
-    console.log("Sending email via SES...");
+    console.log(`Preparing to send email via SES to ${email}...`);
     const sesClient = getSESClient();
     const emailParams = {
       Destination: { ToAddresses: [email] },
@@ -88,7 +95,7 @@ const sendEmailViaSES = async (email, subject, emailHtml) => {
     };
 
     await sesClient.send(new SendEmailCommand(emailParams));
-    console.log("✅ Email sent via SES");
+    console.log("✅ Email sent via SES.");
   } catch (error) {
     console.error("❌ Error sending email via SES:", error);
     throw new Error("Failed to send email via SES");

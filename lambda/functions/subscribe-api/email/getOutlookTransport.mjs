@@ -4,9 +4,12 @@ import { getAccessToken } from "./getAccessToken.mjs";
 
 export const getOutlookTransport = async () => {
   const secrets = await getSmtpCredentials();
+
+  console.log("Fetching access token...");
   const accessToken = await getAccessToken();
 
-  return nodemailer.createTransport({
+  console.log("Creating Outlook SMTP transport...");
+  const transport = nodemailer.createTransport({
     host: "smtp.office365.com",
     port: 587,
     secure: false,
@@ -22,4 +25,7 @@ export const getOutlookTransport = async () => {
       rejectUnauthorized: true,
     },
   });
+
+  console.log("✅ Outlook SMTP transport created successfully.");
+  return transport;
 };
