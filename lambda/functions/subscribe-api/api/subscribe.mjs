@@ -71,10 +71,8 @@ export const handleSubscription = async (client, event) => {
 
     // ✅ Email queueing (inside the transaction)
     const verificationUrl = `${process.env.FRONTEND_DOMAIN_URL}/verify-email?token=${token}`;
-    console.log(`Queuing email verification job for ${email}...`);
 
     await queueEmailJob("verify-email", email, { verificationUrl });
-    console.log(`✅ Email verification job queued for ${email}.`);
 
     // ✅ Commit the transaction (everything succeeds)
     await client.query("COMMIT");

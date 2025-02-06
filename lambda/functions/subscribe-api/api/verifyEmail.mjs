@@ -25,7 +25,6 @@ export const handleVerifyEmail = async (client, event) => {
     };
   }
 
-  console.log("Validating token...");
   const { user_id, email, isUsed } = await validateToken(
     client,
     token,
@@ -101,7 +100,6 @@ export const handleVerifyEmail = async (client, event) => {
     console.log("✅ Encrypted preferences token inserted.");
 
     // ✅ Queue welcome email **inside transaction**
-    console.log("Queuing welcome email job...");
     const accountCompletionUrl = `${process.env.FRONTEND_DOMAIN_URL}/complete-account?token=${accountCompletionToken}`;
     const preferencesUrl = `${process.env.FRONTEND_DOMAIN_URL}/manage-preferences?token=${preferencesToken}`;
 
@@ -109,7 +107,6 @@ export const handleVerifyEmail = async (client, event) => {
       accountCompletionUrl,
       preferencesUrl,
     });
-    console.log("✅ Welcome email job queued.");
 
     // ✅ Commit transaction (everything succeeded)
     await client.query("COMMIT");

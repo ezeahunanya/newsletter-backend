@@ -6,9 +6,7 @@ let lastTokenFetchTime = 0;
 const TOKEN_EXPIRY_BUFFER = 5 * 60 * 1000; // 5 minutes buffer
 
 export const getSmtpCredentials = async () => {
-  console.log("Fetching SMTP credentials from secrets manager...");
   const smtpCredentials = await getSecret(process.env.SMTP_SECRET_NAME);
-  console.log("✅ SMTP credentials fetched successfully.");
   return smtpCredentials;
 };
 

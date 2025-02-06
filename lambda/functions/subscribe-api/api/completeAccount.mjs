@@ -17,9 +17,7 @@ export const handleCompleteAccount = async (client, event) => {
         };
       }
 
-      console.log("Validating token for account completion...");
       const result = await validateToken(client, token, "account_completion");
-      console.log("✅ Token validation successful.");
 
       return {
         statusCode: 200,
@@ -37,7 +35,6 @@ export const handleCompleteAccount = async (client, event) => {
         };
       }
 
-      console.log("Validating token for account completion...");
       let user_id;
       try {
         ({ user_id } = await validateToken(
@@ -45,7 +42,6 @@ export const handleCompleteAccount = async (client, event) => {
           token,
           "account_completion"
         ));
-        console.log(`✅ Token validation successful for user ID: ${user_id}`);
       } catch (error) {
         console.error("❌ Token validation failed:", error);
         return {

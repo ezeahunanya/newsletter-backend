@@ -12,8 +12,6 @@ export const generateUniqueToken = async (client, maxRetries = 10) => {
   let retries = 0;
   let token, tokenHash, isUnique;
 
-  console.log("Attempting to generate a unique token...");
-
   do {
     if (retries >= maxRetries) {
       console.error(
@@ -42,6 +40,5 @@ export const generateUniqueToken = async (client, maxRetries = 10) => {
     }
   } while (!isUnique);
 
-  console.log("✅ Successfully generated a unique token.");
   return { token, tokenHash };
 };

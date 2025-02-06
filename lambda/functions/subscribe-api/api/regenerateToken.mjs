@@ -94,12 +94,10 @@ export const handleRegenerateToken = async (client, event) => {
     console.log("✅ Token table updated successfully.");
 
     // ✅ Queue email (inside the transaction)
-    console.log(`Queuing email job for ${email}...`);
     await queueEmailJob("regenerate-token", email, {
       linkUrl: linkUrl,
       origin: origin,
     });
-    console.log("✅ Email job queued successfully.");
 
     // ✅ Commit transaction (everything succeeded)
     await client.query("COMMIT");

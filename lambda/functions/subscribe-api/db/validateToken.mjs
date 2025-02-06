@@ -24,8 +24,6 @@ export const validateToken = async (
     WHERE t.token_hash = $1 AND t.token_type = $2;
   `;
 
-  console.log(`Executing token query for token hash: ${tokenHash}`);
-
   const tokenResult = await client.query(tokenQuery, [tokenHash, tokenType]);
 
   if (tokenResult.rows.length === 0) {
