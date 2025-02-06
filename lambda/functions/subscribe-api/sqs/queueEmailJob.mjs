@@ -6,6 +6,7 @@ const getSQSClient = () => {
   if (!sqsClient) {
     console.log("Initializing new SQS client...");
     sqsClient = new SQSClient({ region: process.env.AWS_REGION });
+    console.log("✅ Successfully initialized SQS client.");
   }
   return sqsClient;
 };
@@ -37,6 +38,7 @@ export const queueEmailJob = async (eventType, email, data = {}) => {
 
   const sqsClient = getSQSClient();
   const messageBody = JSON.stringify({
+    eventType,
     email,
     data,
   });
