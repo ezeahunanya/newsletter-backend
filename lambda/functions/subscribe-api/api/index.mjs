@@ -1,4 +1,7 @@
-import { getDbCredentials, connectToDatabase } from "../db/db.mjs";
+import {
+  getDbCredentials,
+  connectToDatabase,
+} from "/opt/shared/connectToDatabase.mjs";
 import { handleSubscription } from "./subscribe.mjs";
 import { handleVerifyEmail } from "./verifyEmail.mjs";
 import { handleCompleteAccount } from "./completeAccount.mjs";

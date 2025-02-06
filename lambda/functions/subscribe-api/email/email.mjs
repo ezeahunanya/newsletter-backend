@@ -1,5 +1,5 @@
 import { sendEmailWithTemplate } from "./sendEmailWithTemplate.mjs";
-import { getSecret } from "../credentials/getSecret.mjs";
+import { getSecret } from "/opt/shared/getSecret.mjs";
 
 export const getSmtpCredentials = async () => {
   const smtpCredentials = await getSecret(process.env.SMTP_SECRET_NAME);

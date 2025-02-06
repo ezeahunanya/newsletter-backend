@@ -1,8 +1,8 @@
 import crypto from "crypto";
 import { generateUniqueToken } from "../db/generateUniqueToken.mjs";
 import { validateToken } from "../db/validateToken.mjs";
-import { queueEmailJob, queueUrlMap } from "../sqs/queueEmailJob.mjs";
-import { getSecret } from "../credentials/getSecret.mjs";
+import { queueEmailJob, queueUrlMap } from "/opt/shared/queueEmailJob.mjs";
+import { getSecret } from "/opt/shared/getSecret.mjs";
 
 export const getEncryptionKey = async () => {
   const encryptionKey = await getSecret(process.env.ENCRYPTION_SECRET_NAME);

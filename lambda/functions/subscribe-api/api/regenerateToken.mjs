@@ -1,6 +1,6 @@
 import { validateToken } from "../db/validateToken.mjs";
 import { generateUniqueToken } from "../db/generateUniqueToken.mjs";
-import { queueEmailJob, queueUrlMap } from "../sqs/queueEmailJob.mjs";
+import { queueEmailJob, queueUrlMap } from "/opt/shared/queueEmailJob.mjs";
 
 export const handleRegenerateToken = async (client, event) => {
   try {
