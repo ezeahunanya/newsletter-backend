@@ -1,5 +1,5 @@
 import crypto from "crypto";
-import { getSecret } from "/opt/shared/getSecret.mjs";
+import { getSecret } from "../utils/getSecret.mjs";
 
 export const getEncryptionKey = async () => {
   console.log("Fetching encryption key from secrets manager...");

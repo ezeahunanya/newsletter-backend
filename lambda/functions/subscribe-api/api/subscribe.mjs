@@ -1,5 +1,5 @@
 import { generateUniqueToken } from "../db/generateUniqueToken.mjs";
-import { queueEmailJob } from "/opt/shared/queueEmailJob.mjs";
+import { queueEmailJob } from "../sqs/queueEmailJob.mjs";
 
 export const handleSubscription = async (client, event) => {
   const method = event.requestContext.http.method;

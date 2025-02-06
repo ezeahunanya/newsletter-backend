@@ -1,7 +1,7 @@
 import crypto from "crypto";
 import { generateUniqueToken } from "../db/generateUniqueToken.mjs";
 import { validateToken } from "../db/validateToken.mjs";
-import { queueEmailJob } from "/opt/shared/queueEmailJob.mjs";
+import { queueEmailJob } from "../sqs/queueEmailJob.mjs";
 import { encryptToken } from "../db/encryption.mjs";
 
 export const handleVerifyEmail = async (client, event) => {

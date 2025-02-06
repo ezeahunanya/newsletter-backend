@@ -1,6 +1,6 @@
 import { validateToken } from "../db/validateToken.mjs";
 import { generateUniqueToken } from "../db/generateUniqueToken.mjs";
-import { queueEmailJob } from "/opt/shared/queueEmailJob.mjs";
+import { queueEmailJob } from "../sqs/queueEmailJob.mjs";
 
 export const handleRegenerateToken = async (client, event) => {
   console.log("Received request to regenerate token.");

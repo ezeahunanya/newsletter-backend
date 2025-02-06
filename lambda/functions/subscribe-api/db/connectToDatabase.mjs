@@ -1,4 +1,4 @@
-import { getSecret } from "../credentials/getSecret.mjs";
+import { getSecret } from "../utils/getSecret.mjs";
 import pg from "pg";
 
 const { Client } = pg;

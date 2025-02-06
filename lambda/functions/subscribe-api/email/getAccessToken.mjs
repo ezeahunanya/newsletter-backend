@@ -1,5 +1,5 @@
 import fetch from "node-fetch";
-import { getSecret } from "/opt/shared/getSecret.mjs";
+import { getSecret } from "../utils/getSecret.mjs";
 
 let accessToken = null;
 let lastTokenFetchTime = 0;

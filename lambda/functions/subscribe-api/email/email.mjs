@@ -1,5 +1,5 @@
 import { sendEmailWithTemplate } from "./sendEmailWithTemplate.mjs";
-import { getSecret } from "/opt/shared/getSecret.mjs";
+import { getSecret } from "../utils/getSecret.mjs";
 
 export const getSmtpCredentials = async () => {
   console.log("Fetching SMTP credentials from secrets manager...");

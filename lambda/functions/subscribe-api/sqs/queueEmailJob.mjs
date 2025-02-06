@@ -15,7 +15,7 @@ const queueUrlMap = {
   "verify-email": process.env.VERIFY_EMAIL_QUEUE_URL,
   "welcome-email": process.env.WELCOME_EMAIL_QUEUE_URL,
   "regenerate-token": process.env.VERIFY_EMAIL_QUEUE_URL,
-  "newsletter": process.env.PROCESS_EMAIL_QUEUE_URL,
+  newsletter: process.env.PROCESS_EMAIL_QUEUE_URL,
 };
 
 /**
