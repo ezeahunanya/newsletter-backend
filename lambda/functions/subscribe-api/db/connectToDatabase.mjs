@@ -3,12 +3,18 @@ import pg from "pg";
 
 const { Client } = pg;
 
+let client; // Shared variable
+
 export const getDbCredentials = async () => {
-  const dbCredentials = await getSecret(process.env.DB_SECRET_NAME);
-  return dbCredentials;
+  return await getSecret(process.env.DB_SECRET_NAME);
 };
 
 export const connectToDatabase = async (dbCredentials) => {
+  if (client) {
+    console.log("✅ Reusing existing database connection.");
+    return client;
+  }
+
   const { DB_HOST, DB_NAME, DB_PORT } = process.env;
 
   if (!dbCredentials) {
@@ -16,16 +22,11 @@ export const connectToDatabase = async (dbCredentials) => {
     throw new Error("Missing database credentials.");
   }
 
-  if (!DB_HOST || !DB_NAME || !DB_PORT) {
-    console.error("❌ Missing environment variables for database connection.");
-    throw new Error("Missing environment variables for database connection.");
-  }
-
   console.log(
-    `Attempting to connect to database ${DB_NAME} at ${DB_HOST}:${DB_PORT}...`
+    `🔄 Creating new database connection to ${DB_HOST}:${DB_PORT}...`
   );
 
-  const client = new Client({
+  client = new Client({
     host: DB_HOST,
     database: DB_NAME,
     port: parseInt(DB_PORT, 10),
@@ -40,6 +41,7 @@ export const connectToDatabase = async (dbCredentials) => {
     return client;
   } catch (error) {
     console.error("❌ Database connection failed:", error);
+    client = null; // Reset on failure
     throw new Error("Database connection failed");
   }
 };
