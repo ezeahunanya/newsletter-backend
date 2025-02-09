@@ -23,23 +23,7 @@ export const handleSubscription = async (client, event) => {
     };
   }
 
-  let token, tokenHash;
-  try {
-    console.log(`Generating unique token for email: ${email}`);
-    ({ token, tokenHash } = await generateUniqueToken(client));
-    console.log(`✅ Generated token for ${email}`);
-  } catch (error) {
-    console.error("❌ Failed to generate unique token:", error);
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: "Internal Server Error" }),
-    };
-  }
-
-  const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
-  console.log(`Token will expire at: ${expiresAt}`);
-
-  let userId;
+  let token, tokenHash, userId;
 
   try {
     // ✅ Start the transaction
@@ -57,6 +41,13 @@ export const handleSubscription = async (client, event) => {
     );
     userId = userResult.rows[0].id;
     console.log(`✅ Subscriber added with user ID: ${userId}`);
+
+    console.log(`Generating unique token for email: ${email}`);
+    ({ token, tokenHash } = await generateUniqueToken(client));
+    console.log(`✅ Generated token for ${email}`);
+
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    console.log(`Token will expire at: ${expiresAt}`);
 
     // ✅ Insert verification token (linked to the subscriber)
     console.log(`Inserting verification token for user ID: ${userId}`);

@@ -25,32 +25,20 @@ export const handleVerifyEmail = async (client, event) => {
     };
   }
 
-  const { user_id, email, isUsed } = await validateToken(
-    client,
-    token,
-    "email_verification",
-    process.env.SUBSCRIBERS_TABLE_NAME,
-    { allowUsed: true }
-  );
-
-  if (isUsed) {
-    console.log(`⚠️ Token already used for user ID: ${user_id}. Skipping.`);
-    return {
-      statusCode: 200,
-      body: JSON.stringify({
-        message: "Email already verified.",
-      }),
-    };
-  }
-
-  console.log(`✅ Token validated for user ID: ${user_id}, email: ${email}`);
-
   const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
 
   try {
     // ✅ Begin transaction
     await client.query("BEGIN");
     console.log("🔄 Transaction started.");
+
+    const { user_id, email } = await validateToken(
+      client,
+      token,
+      "email_verification",
+      process.env.SUBSCRIBERS_TABLE_NAME
+    );
+    console.log(`✅ Token validated for user ID: ${user_id}, email: ${email}`);
 
     // ✅ Mark email as verified
     console.log("Marking email as verified...");
@@ -115,6 +103,25 @@ export const handleVerifyEmail = async (client, event) => {
     // ❌ Rollback if any step fails
     await client.query("ROLLBACK");
     console.error("❌ Transaction failed, rolling back changes:", error);
+
+    if (
+      error.message.toLowerCase().includes("expired") ||
+      error.message.toLowerCase().includes("not found")
+    ) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ error: error.message }),
+      };
+    }
+
+    if (error.message.toLowerCase().includes("used")) {
+      return {
+        statusCode: 200,
+        body: JSON.stringify({
+          message: "Email verified successfully. Please check email.",
+        }),
+      };
+    }
 
     return {
       statusCode: 500,

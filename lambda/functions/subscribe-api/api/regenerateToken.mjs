@@ -3,7 +3,16 @@ import { generateUniqueToken } from "../db/generateUniqueToken.mjs";
 import { queueEmailJob } from "../sqs/queueEmailJob.mjs";
 
 export const handleRegenerateToken = async (client, event) => {
-  console.log("Received request to regenerate token.");
+  const method = event.requestContext.http.method;
+  console.log(`Received ${method} request to regenerate token.`);
+
+  if (method !== "PUT") {
+    console.warn(`❌ Method ${method} not allowed.`);
+    return {
+      statusCode: 405,
+      body: JSON.stringify({ error: "Method Not Allowed" }),
+    };
+  }
 
   const token = event.headers["x-token"]; // Custom header for token
   const origin = event.headers["x-request-origin"]; // Custom header for origin
@@ -35,11 +44,14 @@ export const handleRegenerateToken = async (client, event) => {
 
   const tokenType = tokenTypeMap[origin];
 
-  console.log(`Validating token for user with type: ${tokenType}`);
-
-  let user_id, email;
+  let user_id, email, newToken, newTokenHash;
 
   try {
+    // ✅ Begin transaction
+    await client.query("BEGIN");
+    console.log("🔄 Transaction started.");
+
+    console.log(`Validating token for user with type: ${tokenType}`);
     // ✅ Validate the token (allow expired tokens)
     ({ user_id, email } = await validateToken(
       client,
@@ -52,36 +64,14 @@ export const handleRegenerateToken = async (client, event) => {
     console.log(
       `✅ Token validation successful for user ID: ${user_id}, email: ${email}`
     );
-  } catch (error) {
-    console.error("❌ Token validation failed:", error);
-    return {
-      statusCode: 400,
-      body: JSON.stringify({ error: "Invalid or expired token." }),
-    };
-  }
 
-  let newToken, newTokenHash;
-
-  try {
-    console.log("Generating new token...");
+    console.log(`Generating new ${tokenTypeMap[origin]} token...`);
     ({ token: newToken, tokenHash: newTokenHash } = await generateUniqueToken(
       client
     ));
-    console.log("✅ New token generated successfully.");
-  } catch (error) {
-    console.error("❌ Failed to generate new token:", error);
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: "Internal Server Error" }),
-    };
-  }
+    console.log(`✅ New ${tokenTypeMap[origin]} token generated successfully.`);
 
-  const linkUrl = `${process.env.FRONTEND_DOMAIN_URL}/${origin}?token=${newToken}`;
-
-  try {
-    // ✅ Begin transaction
-    await client.query("BEGIN");
-    console.log("🔄 Transaction started.");
+    const linkUrl = `${process.env.FRONTEND_DOMAIN_URL}/${origin}?token=${newToken}`;
 
     // ✅ Update the token table with the new token
     console.log(`Updating token table for user ID: ${user_id}`);

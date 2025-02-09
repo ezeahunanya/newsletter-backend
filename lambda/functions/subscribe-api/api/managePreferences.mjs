@@ -15,35 +15,18 @@ export async function handleManagePreferences(client, event) {
   }
 
   let user_id;
-  try {
-    console.log("Validating token for preferences...");
-    ({ user_id } = await validateToken(client, token, "preferences"));
-    console.log(`✅ Token validation successful for user ID: ${user_id}`);
-  } catch (error) {
-    console.error("❌ Token validation failed:", error);
-    return {
-      statusCode: 400,
-      body: JSON.stringify({ error: "Invalid or expired token." }),
-    };
-  }
 
   if (method === "GET") {
     try {
+      ({ user_id } = await validateToken(client, token, "preferences"));
+
       console.log(`Fetching preferences for user ID: ${user_id}...`);
       const query = `
-        SELECT preferences
-        FROM ${process.env.SUBSCRIBERS_TABLE_NAME}
-        WHERE id = $1;
+      SELECT preferences
+      FROM ${process.env.SUBSCRIBERS_TABLE_NAME}
+      WHERE id = $1;
       `;
       const result = await client.query(query, [user_id]);
-
-      if (result.rows.length === 0) {
-        console.warn(`⚠️ User ID ${user_id} not found.`);
-        return {
-          statusCode: 404,
-          body: JSON.stringify({ message: "User not found." }),
-        };
-      }
 
       const { preferences } = result.rows[0];
       console.log(`✅ Retrieved preferences for user ID: ${user_id}.`);
@@ -53,6 +36,18 @@ export async function handleManagePreferences(client, event) {
       };
     } catch (error) {
       console.error("❌ Error fetching preferences:", error);
+
+      if (
+        error.message.toLowerCase().includes("expired") ||
+        error.message.toLowerCase().includes("used") ||
+        error.message.toLowerCase().includes("not found")
+      ) {
+        return {
+          statusCode: 400,
+          body: JSON.stringify({ error: error.message }),
+        };
+      }
+
       return {
         statusCode: 500,
         body: JSON.stringify({ error: "Internal Server Error" }),
@@ -86,6 +81,9 @@ export async function handleManagePreferences(client, event) {
       // ✅ Begin transaction
       await client.query("BEGIN");
       console.log("🔄 Transaction started.");
+
+      ({ user_id } = await validateToken(client, token, "preferences"));
+      console.log(`✅ Token validation successful for user ID: ${user_id}`);
 
       let updateQuery;
       let updateParams;
@@ -126,6 +124,17 @@ export async function handleManagePreferences(client, event) {
       // ❌ Rollback if any step fails
       await client.query("ROLLBACK");
       console.error("❌ Transaction failed, rolling back changes:", error);
+
+      if (
+        error.message.toLowerCase().includes("expired") ||
+        error.message.toLowerCase().includes("used") ||
+        error.message.toLowerCase().includes("not found")
+      ) {
+        return {
+          statusCode: 400,
+          body: JSON.stringify({ error: error.message }),
+        };
+      }
 
       return {
         statusCode: 500,

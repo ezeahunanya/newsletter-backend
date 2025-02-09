@@ -5,7 +5,7 @@ export const validateToken = async (
   token,
   tokenType,
   subscriberTableName = null, // Optional parameter for subscriber table
-  { allowExpired = false, allowUsed = false } = {} // Destructured options
+  { allowExpired = false } = {} // Destructured options
 ) => {
   console.log(`Starting token validation for token type: ${tokenType}`);
 
@@ -21,34 +21,29 @@ export const validateToken = async (
     SELECT t.user_id, t.used, t.expires_at${additionalFields}
     FROM ${process.env.TOKEN_TABLE_NAME} t
     ${joinClause}
-    WHERE t.token_hash = $1 AND t.token_type = $2;
+    WHERE t.token_hash = $1 AND t.token_type = $2
+    FOR UPDATE;
   `;
 
   const tokenResult = await client.query(tokenQuery, [tokenHash, tokenType]);
 
   if (tokenResult.rows.length === 0) {
-    console.error(
-      "❌ Token validation failed: Invalid token or user not found."
-    );
+    console.warn("⚠️ Token not found.");
     throw new Error("User not found: Invalid token.");
   }
 
   const { used, expires_at, ...additionalFieldsResult } = tokenResult.rows[0];
 
-  console.log(`✅ Token validation successful. Token type: ${tokenType}`);
+  console.log(`✅ Token found. Token type: ${tokenType}`);
 
   if (used) {
     console.warn("⚠️ Token is already used.");
-    if (!allowUsed) {
-      if (tokenType === "email_verification") {
-        throw new Error(
-          "Email already subscribed: Token has already been used."
-        );
-      } else if (tokenType === "account_completion") {
-        throw new Error("Name already saved: Token has already been used.");
-      } else {
-        throw new Error("Token has already been used.");
-      }
+    if (tokenType === "email_verification") {
+      throw new Error("Email already subscribed: Token has already been used.");
+    } else if (tokenType === "account_completion") {
+      throw new Error("Name already saved: Token has already been used.");
+    } else {
+      throw new Error("Token has already been used.");
     }
   }
 
@@ -59,13 +54,9 @@ export const validateToken = async (
     }
   }
 
-  console.log(
-    `✅ Token is valid for user ID: ${additionalFieldsResult.user_id}`
-  );
   return {
     ...additionalFieldsResult,
     isExpired: new Date() > new Date(expires_at),
-    isUsed: used,
     message: "Token is valid.",
   };
 };
