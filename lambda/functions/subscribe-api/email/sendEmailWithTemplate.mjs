@@ -52,7 +52,7 @@ const sendEmailViaOutlook = async (email, subject, emailHtml) => {
     const transporter = await getOutlookTransport();
 
     const mailOptions = {
-      from: process.env.OUTLOOK_SMTP_SENDER,
+      from: `Eze's Newsletter ${process.env.OUTLOOK_SMTP_SENDER}`,
       to: email,
       subject: subject,
       html: emailHtml,
