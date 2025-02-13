@@ -17,6 +17,7 @@ const queueUrlMap = {
   "welcome-email": process.env.WELCOME_EMAIL_QUEUE_URL,
   "regenerate-token": process.env.VERIFY_EMAIL_QUEUE_URL,
   newsletter: process.env.PROCESS_EMAIL_QUEUE_URL,
+  "new-subscriber": process.env.NEW_SUBSCRIBER_QUEUE_URL,
 };
 
 /**
@@ -26,15 +27,8 @@ const queueUrlMap = {
  * @param {object} data - Email data (subject, template, links, etc.)
  */
 
-export const queueEmailJob = async (eventType, email, data = {}) => {
+export const queueSQSJob = async (eventType, data = {}) => {
   const queueUrl = queueUrlMap[eventType];
-
-  if (!email) {
-    console.error("❌ No email provided for email job.");
-    throw new Error("No email provided");
-  }
-
-  console.log(`Queuing email job for ${email} to ${queueUrl}...`);
 
   const sqsClient = getSQSClient();
   const messageBody = JSON.stringify({
