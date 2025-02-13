@@ -3,7 +3,7 @@ import { handleSubscribeRoute } from "./routes/subscribe.mjs";
 export const handler = async (event) => {
   // Validate the event structure
   if (!event || !event.requestContext || !event.rawPath) {
-    console.error("Invalid event structure.");
+    console.error("❌ Invalid event structure.");
     return {
       statusCode: 400,
       body: JSON.stringify({ error: "Invalid Request" }),
@@ -35,7 +35,7 @@ export const handler = async (event) => {
         return await handleSubscribeRoute(event);
       // Add additional routes here
       default:
-        console.warn(`Path not found: ${normalizedPath}`);
+        console.warn(`❌ Path not found: ${normalizedPath}`);
         return {
           statusCode: 404,
           body: JSON.stringify({ error: "Route Not Found" }),
@@ -43,7 +43,7 @@ export const handler = async (event) => {
     }
   } catch (error) {
     // Catch unexpected errors
-    console.error("Unhandled error:", error);
+    console.error("❌ Unhandled error:", error);
     return {
       statusCode: 500,
       body: JSON.stringify({ error: "Internal Server Error" }),

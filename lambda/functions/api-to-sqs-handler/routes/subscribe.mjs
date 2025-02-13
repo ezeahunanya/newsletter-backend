@@ -9,7 +9,7 @@ export const handleSubscribeRoute = async (event) => {
     try {
       requestBody = JSON.parse(body);
     } catch (error) {
-      console.error("Invalid JSON in request body:", error);
+      console.error("❌ Invalid JSON in request body:", error);
       return {
         statusCode: 400,
         body: JSON.stringify({ error: "Invalid JSON body" }),
@@ -19,7 +19,7 @@ export const handleSubscribeRoute = async (event) => {
     const { email } = requestBody;
 
     if (!email) {
-      console.error("Missing email in request body.");
+      console.error("❌ Missing email in request body.");
       return {
         statusCode: 400,
         body: JSON.stringify({ error: "Email is required" }),
@@ -34,7 +34,7 @@ export const handleSubscribeRoute = async (event) => {
       body: JSON.stringify({ message: "Subscription request received" }),
     };
   } catch (error) {
-    console.error("Error handling /subscribe route:", error);
+    console.error("❌ Error handling /subscribe route:", error);
     return {
       statusCode: 500,
       body: JSON.stringify({ error: "Internal Server Error" }),

@@ -41,9 +41,9 @@ export const queueSQSJob = async (eventType, data = {}) => {
     await sqsClient.send(
       new SendMessageCommand({ QueueUrl: queueUrl, MessageBody: messageBody })
     );
-    console.log(`✅ Successfully queued email job for ${email} to ${queueUrl}`);
+    console.log(`✅ Successfully queued SQS job to ${queueUrl}`);
   } catch (error) {
-    console.error(`❌ Failed to queue email job for ${email}:`, error);
-    throw new Error("Failed to queue email job");
+    console.error(`❌ Failed to queue SQS job:`, error);
+    throw new Error("Failed to queue SQS job");
   }
 };
