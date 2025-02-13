@@ -3,30 +3,47 @@ import pg from "pg";
 
 const { Client } = pg;
 
-let client; // Shared variable
+let dbClient; // Shared database connection
+let dbCredentials; // Cached credentials
 
-export const getDbCredentials = async () => {
-  return await getSecret(process.env.DB_SECRET_NAME);
-};
-
-export const connectToDatabase = async (dbCredentials) => {
-  if (client) {
+/**
+ * Establishes or reuses a database connection.
+ * @returns {Promise<pg.Client>} - A connected database client.
+ */
+export const connectToDatabase = async () => {
+  // Reuse existing connection if available
+  if (dbClient) {
     console.log("✅ Reusing existing database connection.");
-    return client;
+    return dbClient;
   }
 
-  const { DB_HOST, DB_NAME, DB_PORT } = process.env;
-
+  // Retrieve database credentials if not cached
   if (!dbCredentials) {
-    console.error("❌ Missing database credentials.");
-    throw new Error("Missing database credentials.");
+    console.log("🔄 Fetching database credentials...");
+    try {
+      dbCredentials = await getSecret(process.env.DB_SECRET_NAME);
+    } catch (error) {
+      console.error("❌ Failed to retrieve database credentials:", error);
+      throw new Error("Failed to retrieve database credentials");
+    }
+  }
+
+  // Validate required environment variables
+  const { DB_HOST, DB_NAME, DB_PORT } = process.env;
+  if (!DB_HOST || !DB_NAME || !DB_PORT) {
+    console.error(
+      "❌ Missing required environment variables for database connection."
+    );
+    throw new Error(
+      "Missing required environment variables for database connection"
+    );
   }
 
   console.log(
     `🔄 Creating new database connection to ${DB_HOST}:${DB_PORT}...`
   );
 
-  client = new Client({
+  dbClient = new Client({
     host: DB_HOST,
     database: DB_NAME,
     port: parseInt(DB_PORT, 10),
@@ -36,12 +53,12 @@ export const connectToDatabase = async (dbCredentials) => {
   });
 
   try {
-    await client.connect();
+    await dbClient.connect();
     console.log("✅ Successfully connected to the database.");
-    return client;
+    return dbClient;
   } catch (error) {
     console.error("❌ Database connection failed:", error);
-    client = null; // Reset on failure
+    dbClient = null; // Reset the client in case of failure
     throw new Error("Database connection failed");
   }
 };
