@@ -1,16 +1,27 @@
 import { handleSubscribeRoute } from "./routes/subscribe.mjs";
 
 export const handler = async (event) => {
-  try {
-    // Validate the event structure
-    if (!event || !event.requestContext || !event.rawPath) {
-      console.error("Invalid event structure.");
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ error: "Invalid Request" }),
-      };
-    }
+  // Validate the event structure
+  if (!event || !event.requestContext || !event.rawPath) {
+    console.error("Invalid event structure.");
+    return {
+      statusCode: 400,
+      body: JSON.stringify({ error: "Invalid Request" }),
+    };
+  }
 
+  // Detect EventBridge Scheduler warm-up pings
+  if (event.source === "aws.scheduler") {
+    console.log(
+      "Warm-up ping received from EventBridge Scheduler. Keeping Lambda warm."
+    );
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ message: "Lambda warmed up" }),
+    };
+  }
+
+  try {
     // Extract path and stage
     const { stage } = event.requestContext;
     const { rawPath } = event;
