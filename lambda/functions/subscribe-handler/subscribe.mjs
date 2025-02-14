@@ -17,12 +17,7 @@ export const handleSubscription = async (extractedVariables = {}, client) => {
     throw new Error("Invalid payload: Missing email or eventType.");
   }
 
-  try {
-    await processSubscription(client, email, eventType);
-  } catch (error) {
-    console.error("❌ Error handling subscription:", error);
-    throw error; // Rethrow error for logging or retries.
-  }
+  await processSubscription(client, email, eventType);
 };
 
 /**
@@ -56,6 +51,7 @@ const processSubscription = async (client, email, eventType) => {
 
     if (error.code === "23505") {
       console.warn("⚠️ Duplicate email detected: Email already subscribed.");
+      return; // Skip further processing for duplicate emails.
     }
     throw error; // Ensure error bubbles up for proper handling.
   }
