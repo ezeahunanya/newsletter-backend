@@ -1,13 +1,11 @@
 import { handleSubscribeRoute } from "./routes/subscribe.mjs";
+import { createResponse } from "/opt/shared/createResponse.mjs";
 
 export const handler = async (event) => {
   // Validate the event structure
   if (!event || !event.requestContext || !event.rawPath) {
     console.error("❌ Invalid event structure.");
-    return {
-      statusCode: 400,
-      body: JSON.stringify({ error: "Invalid Request" }),
-    };
+    return createResponse(400, { error: "Invalid Request" });
   }
 
   // Detect EventBridge Scheduler warm-up pings
@@ -15,10 +13,7 @@ export const handler = async (event) => {
     console.log(
       "Warm-up ping received from EventBridge Scheduler. Keeping Lambda warm."
     );
-    return {
-      statusCode: 200,
-      body: JSON.stringify({ message: "Lambda warmed up" }),
-    };
+    return createResponse(200, { message: "Lambda warmed up" });
   }
 
   try {
@@ -36,17 +31,11 @@ export const handler = async (event) => {
       // Add additional routes here
       default:
         console.warn(`❌ Path not found: ${normalizedPath}`);
-        return {
-          statusCode: 404,
-          body: JSON.stringify({ error: "Route Not Found" }),
-        };
+        return createResponse(404, { error: "Route Not Found" });
     }
   } catch (error) {
     // Catch unexpected errors
     console.error("❌ Unhandled error:", error);
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: "Internal Server Error" }),
-    };
+    return createResponse(500, { error: "Internal Server Error" });
   }
 };

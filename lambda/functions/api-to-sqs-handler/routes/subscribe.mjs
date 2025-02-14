@@ -10,10 +10,7 @@ export const handleSubscribeRoute = async (event) => {
       requestBody = JSON.parse(body);
     } catch (error) {
       console.error("❌ Invalid JSON in request body:", error);
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ error: "Invalid JSON body" }),
-      };
+      return createResponse(400, { error: "Invalid JSON body" });
     }
 
     const { email } = requestBody;
@@ -29,15 +26,9 @@ export const handleSubscribeRoute = async (event) => {
     // Queue the job
     await queueSQSJob("new-subscriber", { email });
 
-    return {
-      statusCode: 202, // Accepted (processing asynchronously)
-      body: JSON.stringify({ message: "Subscription request received" }),
-    };
+    return createResponse(202, { message: "Subscription request received" });
   } catch (error) {
     console.error("❌ Error handling /subscribe route:", error);
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: "Internal Server Error" }),
-    };
+    return createResponse(500, { error: "Internal Server Error" });
   }
 };
