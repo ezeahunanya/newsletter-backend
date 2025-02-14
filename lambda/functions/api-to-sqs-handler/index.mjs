@@ -2,18 +2,18 @@ import { handleSubscribeRoute } from "./routes/subscribe.mjs";
 import { createResponse } from "/opt/shared/createResponse.mjs";
 
 export const handler = async (event) => {
-  // Validate the event structure
-  if (!event || !event.requestContext || !event.rawPath) {
-    console.error("❌ Invalid event structure.");
-    return createResponse(400, { error: "Invalid Request" });
-  }
-
   // Detect EventBridge Scheduler warm-up pings
   if (event.source === "aws.scheduler") {
     console.log(
       "Warm-up ping received from EventBridge Scheduler. Keeping Lambda warm."
     );
     return createResponse(200, { message: "Lambda warmed up" });
+  }
+
+  // Validate the event structure
+  if (!event || !event.requestContext || !event.rawPath) {
+    console.error("❌ Invalid event structure.");
+    return createResponse(400, { error: "Invalid Request" });
   }
 
   try {
