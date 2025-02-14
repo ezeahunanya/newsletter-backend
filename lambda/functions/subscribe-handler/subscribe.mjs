@@ -1,54 +1,79 @@
 import { generateUniqueToken } from "/opt/shared/generateUniqueToken.mjs";
 
-export const handleSubscription = async (requiredVariables = {}, client) => {
-  let email, eventType;
-  try {
-    ({ email, eventType } = requiredVariables);
-  } catch {
-    console.error("❌ Invalid JSON payload.");
+/**
+ * Handles subscription logic based on the SQS message payload.
+ *
+ * @param {object} extractedVariables - Extracted variables from the message body.
+ * @param {object|null} client - Database client, if applicable.
+ */
+export const handleSubscription = async (extractedVariables = {}, client) => {
+  const { email, eventType } = extractedVariables;
+
+  if (!email || !eventType) {
+    console.error(
+      "❌ Missing required variables in message payload:",
+      extractedVariables
+    );
+    throw new Error("Invalid payload: Missing email or eventType.");
   }
 
-  return await processSubscription(client, email, eventType);
+  try {
+    await processSubscription(client, email, eventType);
+  } catch (error) {
+    console.error("❌ Error handling subscription:", error);
+    throw error; // Rethrow error for logging or retries.
+  }
 };
 
 /**
  * Processes the subscription logic, including database transactions.
- * @param {object} client - Database client
- * @param {string} email - Subscriber's email
- * @returns {object} - Lambda HTTP response
+ *
+ * @param {object} client - Database client.
+ * @param {string} email - Subscriber's email.
+ * @param {string} eventType - Type of event.
  */
 const processSubscription = async (client, email, eventType) => {
-  if (eventType === "new-subscriber") {
-    try {
-      await client.query("BEGIN");
-      console.log("🔄 Transaction started.");
+  if (eventType !== "new-subscriber") {
+    console.warn(`⚠️ Unsupported event type: ${eventType}`);
+    throw new Error("Unsupported event type.");
+  }
 
-      const userId = await insertSubscriber(client, email);
-      const { token, tokenHash } = await generateUniqueToken(client);
-      const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
-      await insertVerificationToken(client, userId, tokenHash, expiresAt);
+  try {
+    await client.query("BEGIN");
+    console.log("🔄 Database transaction started.");
 
-      await client.query("COMMIT");
-      console.log("✅ Transaction committed successfully.");
-    } catch (error) {
-      await client.query("ROLLBACK");
-      console.error("❌ Transaction failed, rolling back changes:", error);
+    const userId = await insertSubscriber(client, email);
+    const { token, tokenHash } = await generateUniqueToken(client);
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // Token expiration in 24 hours.
 
-      if (error.code === "23505") {
-        console.error("❌ Email already subscribed.");
-      }
+    await insertVerificationToken(client, userId, tokenHash, expiresAt);
+
+    await client.query("COMMIT");
+    console.log("✅ Subscription transaction committed successfully.");
+  } catch (error) {
+    await client.query("ROLLBACK");
+    console.error("❌ Transaction failed, rolling back changes:", error);
+
+    if (error.code === "23505") {
+      console.warn("⚠️ Duplicate email detected: Email already subscribed.");
     }
+    throw error; // Ensure error bubbles up for proper handling.
   }
 };
 
 /**
  * Inserts a new subscriber into the database.
- * @param {object} client - Database client
- * @param {string} email - Subscriber's email
- * @returns {number} - Subscriber ID
+ *
+ * @param {object} client - Database client.
+ * @param {string} email - Subscriber's email.
+ * @returns {number} - Subscriber ID.
  */
 const insertSubscriber = async (client, email) => {
-  console.log(`Inserting new subscriber with email: ${email}`);
+  if (!process.env.SUBSCRIBERS_TABLE_NAME) {
+    throw new Error("Environment variable SUBSCRIBERS_TABLE_NAME is not set.");
+  }
+
+  console.log(`🔄 Adding new subscriber with email: ${email}`);
   const result = await client.query(
     `
     INSERT INTO ${process.env.SUBSCRIBERS_TABLE_NAME} 
@@ -58,17 +83,23 @@ const insertSubscriber = async (client, email) => {
     `,
     [email, JSON.stringify({ updates: true, promotions: true })]
   );
-  const userId = result.rows[0].id;
-  console.log(`✅ Subscriber added with ID: ${userId}`);
+
+  const userId = result.rows[0]?.id;
+  if (!userId) {
+    throw new Error("Failed to retrieve subscriber ID after insertion.");
+  }
+
+  console.log(`✅ Subscriber added successfully with ID: ${userId}`);
   return userId;
 };
 
 /**
  * Inserts a verification token into the database.
- * @param {object} client - Database client
- * @param {number} userId - Subscriber ID
- * @param {string} tokenHash - Hashed token
- * @param {Date} expiresAt - Token expiry date
+ *
+ * @param {object} client - Database client.
+ * @param {number} userId - Subscriber ID.
+ * @param {string} tokenHash - Hashed token.
+ * @param {Date} expiresAt - Token expiration date.
  */
 const insertVerificationToken = async (
   client,
@@ -76,7 +107,11 @@ const insertVerificationToken = async (
   tokenHash,
   expiresAt
 ) => {
-  console.log(`Inserting verification token for user ID: ${userId}`);
+  if (!process.env.TOKEN_TABLE_NAME) {
+    throw new Error("Environment variable TOKEN_TABLE_NAME is not set.");
+  }
+
+  console.log(`🔄 Adding verification token for user ID: ${userId}`);
   await client.query(
     `
     INSERT INTO ${process.env.TOKEN_TABLE_NAME} 
@@ -85,5 +120,5 @@ const insertVerificationToken = async (
     `,
     [userId, tokenHash, expiresAt]
   );
-  console.log("✅ Token inserted successfully.");
+  console.log("✅ Verification token added successfully.");
 };

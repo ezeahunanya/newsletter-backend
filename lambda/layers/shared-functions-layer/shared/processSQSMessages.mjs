@@ -1,7 +1,7 @@
 import { connectToDatabase } from "/opt/shared/connectToDatabase.mjs";
 
 /**
- * Processes SQS messages.
+ * Processes SQS messages with optional database connectivity.
  *
  * @param {object} event - The SQS event object.
  * @param {string[]} requiredVariables - List of variable names to extract from each record.
@@ -18,63 +18,93 @@ export const processSQSMessages = async (
     throw new Error("Invalid SQS event: Missing or malformed Records array.");
   }
 
-  let client = null; // Initialize the database client (if needed)
-  const results = []; // Keep track of processing results for logging or debugging.
+  let client = null; // Initialize the database client if needed
+  const results = []; // To store processing results for all records
 
   try {
-    // Connect to the database if useDatabase is true
+    // Establish database connection if requested
     if (useDatabase) {
       console.log("🔄 Establishing database connection...");
       client = await connectToDatabase();
     }
 
+    // Process each SQS record
     for (const record of event.Records) {
-      try {
-        // Parse the SQS message body
-        const messageBody = JSON.parse(record.body);
-        console.log("🔄 Processing SQS message:", messageBody);
-
-        // Extract required variables from the message body
-        const extractedVariables = {};
-        for (const variable of requiredVariables) {
-          if (messageBody[variable] === undefined) {
-            throw new Error(`Missing required variable: ${variable}`);
-          }
-          extractedVariables[variable] = messageBody[variable];
-        }
-
-        // Call the provided processing function with extracted variables and optional client
-        const result = await processFunction(extractedVariables, client);
-        results.push({ recordId: record.messageId, status: "success", result });
-
-        console.log(
-          `✅ Successfully processed message with ID: ${record.messageId}`
-        );
-      } catch (error) {
-        console.error(
-          `❌ Failed to process message with ID: ${record.messageId}`,
-          error
-        );
-        results.push({
-          recordId: record.messageId,
-          status: "failure",
-          error: error.message,
-        });
-
-        // Decide whether to rethrow the error to trigger retries or log and skip
-        // Uncomment below if you want SQS to retry failed messages:
-        // throw error;
-      }
+      const result = await processSingleMessage(
+        record,
+        requiredVariables,
+        processFunction,
+        client
+      );
+      results.push(result);
     }
 
-    console.log("🔔 All messages processed. Results:", results);
+    // Log summary of results after processing
+    const successCount = results.filter((r) => r.status === "success").length;
+    const failureCount = results.filter((r) => r.status === "failure").length;
+    console.log(
+      `🔔 Message processing completed: ${successCount} succeeded, ${failureCount} failed.`
+    );
   } catch (error) {
     console.error("❌ Error during SQS message processing:", error);
-    throw error; // Re-throw to let SQS retry all messages
+    throw error; // Re-throw to ensure retries for all messages
   } finally {
-    // Reset the database connection if it was used
+    // Clean up database connection if it was used
     if (useDatabase && client) {
       client = null; // Reset the local variable only
     }
   }
+};
+
+/**
+ * Processes a single SQS message.
+ *
+ * @param {object} record - The SQS record to process.
+ * @param {string[]} requiredVariables - List of variables to extract from the message body.
+ * @param {function} processFunction - Function to handle message logic.
+ * @param {object|null} client - Optional database client for processing.
+ * @returns {object} - Result object indicating success or failure.
+ */
+const processSingleMessage = async (
+  record,
+  requiredVariables,
+  processFunction,
+  client
+) => {
+  try {
+    // Parse and validate the message body
+    const messageBody = JSON.parse(record.body);
+    const extractedVariables = extractVariables(messageBody, requiredVariables);
+
+    // Execute the provided processing function
+    const result = await processFunction(extractedVariables, client);
+    console.log(`✅ Message ID ${record.messageId} processed successfully.`);
+    return { recordId: record.messageId, status: "success", result };
+  } catch (error) {
+    console.error(`❌ Error processing message ID ${record.messageId}:`, error);
+    return {
+      recordId: record.messageId,
+      status: "failure",
+      error: error.message,
+    };
+  }
+};
+
+/**
+ * Extracts required variables from the message body.
+ *
+ * @param {object} messageBody - Parsed JSON message body.
+ * @param {string[]} requiredVariables - List of variables to extract.
+ * @returns {object} - Object containing extracted variables.
+ * @throws {Error} - If any required variable is missing.
+ */
+const extractVariables = (messageBody, requiredVariables) => {
+  const extractedVariables = {};
+  for (const variable of requiredVariables) {
+    if (messageBody[variable] === undefined) {
+      throw new Error(`Missing required variable: ${variable}`);
+    }
+    extractedVariables[variable] = messageBody[variable];
+  }
+  return extractedVariables;
 };

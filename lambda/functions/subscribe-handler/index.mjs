@@ -3,11 +3,12 @@ import { processSQSMessages } from "/opt/shared/processSQSMessages.mjs";
 
 export const handler = async (event) => {
   if (event.source === "aws.events") {
-    console.log("Lambda warm-up request. Returning early.");
+    console.log("🔄 Lambda warm-up request detected. Exiting early.");
     return;
   }
 
   const requiredVariables = ["email", "eventType"];
+  const useDatabase = true; // Explicitly define if the database is used.
 
   try {
     await processSQSMessages(
@@ -16,8 +17,8 @@ export const handler = async (event) => {
       handleSubscription,
       useDatabase
     );
-    console.log("✅ Lambda completed successfully.");
+    console.log("✅ All SQS messages processed successfully.");
   } catch (error) {
-    console.error("❌ Error handling subscription:", error);
+    console.error("❌ Error during SQS message processing:", error);
   }
 };
