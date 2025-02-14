@@ -1,8 +1,5 @@
-import {
-  getDbCredentials,
-  connectToDatabase,
-} from "/opt/shared/connectToDatabase.mjs";
 import { handleSubscription } from "./subscribe.mjs";
+import { processSQSMessages } from "/opt/shared/processSQSMessages.mjs";
 
 export const handler = async (event) => {
   if (event.source === "aws.events") {
@@ -10,30 +7,17 @@ export const handler = async (event) => {
     return;
   }
 
-  const stage = event.requestContext.stage; // Get the stage ('dev', 'prod', etc.)
-  const rawPath = event.rawPath; // Includes the stage prefix (e.g., /dev/subscribe)
-  const normalizedPath = rawPath.replace(`/${stage}`, ""); // Strip the stage prefix
-
-  if (normalizedPath !== "/subscribe") {
-    console.warn(`❌ Route ${normalizedPath} not found.`);
-    return {
-      statusCode: 404,
-      body: JSON.stringify({ error: "Route Not found" }),
-    };
-  }
-
-  let client;
+  const requiredVariables = ["email", "eventType"];
 
   try {
-    const dbCredentials = await getDbCredentials();
-    client = await connectToDatabase(dbCredentials);
-
-    return await handleSubscription(client, event);
+    await processSQSMessages(
+      event,
+      requiredVariables,
+      handleSubscription,
+      useDatabase
+    );
+    console.log("✅ Lambda completed successfully.");
   } catch (error) {
-    console.error(error);
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: "Internal Server Error" }),
-    };
+    console.error("❌ Error handling subscription:", error);
   }
 };
