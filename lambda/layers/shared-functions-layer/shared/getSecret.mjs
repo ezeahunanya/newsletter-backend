@@ -8,7 +8,7 @@ const cachedSecrets = {};
 
 // Initialize SecretsManager client outside the function
 const secretsClient = new SecretsManagerClient({
-  region: process.env.AWS_REGION || "us-east-1", // Default to a region if none is provided
+  region: process.env.AWS_REGION || "eu-west-1", // Default to a region if none is provided
 });
 
 /**
