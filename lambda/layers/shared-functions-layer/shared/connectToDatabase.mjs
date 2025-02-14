@@ -11,10 +11,16 @@ let dbCredentials; // Cached credentials
  * @returns {Promise<pg.Client>} - A connected database client.
  */
 export const connectToDatabase = async () => {
-  // Reuse existing connection if available
   if (dbClient) {
-    console.log("✅ Reusing existing database connection.");
-    return dbClient;
+    try {
+      // Verify if the connection is still active
+      await dbClient.query("SELECT 1");
+      console.log("✅ Reusing existing database connection.");
+      return dbClient;
+    } catch (error) {
+      console.error("❌ Stale connection detected. Reconnecting...");
+      dbClient = null; // Reset the client
+    }
   }
 
   // Retrieve database credentials if not cached
