@@ -65,7 +65,7 @@ export const processSQSMessages = async (
  * @param {object|null} client - Optional database client for processing.
  * @returns {object} - Result object indicating success or failure.
  */
-const processSingleMessage = async (
+export const processSingleMessage = async (
   record,
   requiredVariables,
   processFunction,

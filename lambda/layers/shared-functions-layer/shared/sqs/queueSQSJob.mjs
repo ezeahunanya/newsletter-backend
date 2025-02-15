@@ -18,11 +18,10 @@ const getSQSClient = () => {
 
 // 🔹 Map event types to their respective SQS queue URLs
 const queueUrlMap = {
-  "verify-email": process.env.VERIFY_EMAIL_QUEUE_URL,
-  "welcome-email": process.env.WELCOME_EMAIL_QUEUE_URL,
-  "regenerate-token": process.env.VERIFY_EMAIL_QUEUE_URL,
+  "verify-email": process.env.NEW_SUBSCRIBER_QUEUE_URL,
+  "welcome-email": process.env.NEW_SUBSCRIBER_QUEUE_URL,
+  "regenerate-token": process.env.NEW_SUBSCRIBER_QUEUE_URL,
   newsletter: process.env.PROCESS_EMAIL_QUEUE_URL,
-  "new-subscriber": process.env.NEW_SUBSCRIBER_QUEUE_URL,
 };
 
 /**
