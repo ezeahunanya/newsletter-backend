@@ -1,6 +1,5 @@
 import nodemailer from "nodemailer";
-import { getSmtpCredentials } from "./getAccessToken.mjs";
-import { getAccessToken } from "./getAccessToken.mjs";
+import { getSmtpCredentials, getAccessToken } from "./getAccessToken.mjs";
 
 export const getOutlookTransport = async () => {
   const secrets = await getSmtpCredentials();
