@@ -1,5 +1,5 @@
 import { handleSubscribeRoute } from "./routes/subscribe.mjs";
-import { createResponse } from "/opt/shared/createResponse.mjs";
+import { createResponse } from "/opt/shared/utils/createResponse.mjs";
 
 export const handler = async (event) => {
   // Detect EventBridge Scheduler warm-up pings

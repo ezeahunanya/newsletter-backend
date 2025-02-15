@@ -1,4 +1,4 @@
-import { generateUniqueToken } from "/opt/shared/generateUniqueToken.mjs";
+import { generateUniqueToken } from "/opt/shared/utils/generateUniqueToken.mjs";
 
 /**
  * Handles subscription logic based on the SQS message payload.

@@ -1,21 +1,21 @@
-import { connectToDatabase } from "/opt/shared/connectToDatabase.mjs";
+import { connectToDatabase } from "../db/connectToDatabase.mjs";
 
 /**
- * Processes SQS messages with optional database connectivity.
+ * Processes SNS messages with optional database connectivity.
  *
- * @param {object} event - The SQS event object.
- * @param {string[]} requiredVariables - List of variable names to extract from each record.
+ * @param {object} event - The SNS event object.
+ * @param {string[]} requiredVariables - List of variable names to extract from each message.
  * @param {function} processFunction - Function that processes each message, accepting extracted variables and optional client.
  * @param {boolean} [useDatabase=false] - Whether to connect to the database and pass the client to the processFunction.
  */
-export const processSQSMessages = async (
+export const processSNSMessages = async (
   event,
   requiredVariables,
   processFunction,
   useDatabase = false
 ) => {
   if (!event || !event.Records || !Array.isArray(event.Records)) {
-    throw new Error("Invalid SQS event: Missing or malformed Records array.");
+    throw new Error("Invalid SNS event: Missing or malformed Records array.");
   }
 
   let client = null; // Initialize the database client if needed
@@ -28,7 +28,7 @@ export const processSQSMessages = async (
       client = await connectToDatabase();
     }
 
-    // Process each SQS record
+    // Process each SNS record
     for (const record of event.Records) {
       const result = await processSingleMessage(
         record,
@@ -46,7 +46,7 @@ export const processSQSMessages = async (
       `🔔 Message processing completed: ${successCount} succeeded, ${failureCount} failed.`
     );
   } catch (error) {
-    console.error("❌ Error during SQS message processing:", error);
+    console.error("❌ Error during SNS message processing:", error);
     throw error; // Re-throw to ensure retries for all messages
   } finally {
     // Clean up database connection if it was used
@@ -57,9 +57,9 @@ export const processSQSMessages = async (
 };
 
 /**
- * Processes a single SQS message.
+ * Processes a single SNS message.
  *
- * @param {object} record - The SQS record to process.
+ * @param {object} record - The SNS record to process.
  * @param {string[]} requiredVariables - List of variables to extract from the message body.
  * @param {function} processFunction - Function to handle message logic.
  * @param {object|null} client - Optional database client for processing.
@@ -72,18 +72,23 @@ const processSingleMessage = async (
   client
 ) => {
   try {
-    // Parse and validate the message body
-    const messageBody = JSON.parse(record.body);
+    // Parse and validate the SNS message body
+    const messageBody = JSON.parse(record.Sns.Message);
     const extractedVariables = extractVariables(messageBody, requiredVariables);
 
     // Execute the provided processing function
     const result = await processFunction(extractedVariables, client);
-    console.log(`✅ Message ID ${record.messageId} processed successfully.`);
-    return { recordId: record.messageId, status: "success", result };
+    console.log(
+      `✅ Message ID ${record.Sns.MessageId} processed successfully.`
+    );
+    return { recordId: record.Sns.MessageId, status: "success", result };
   } catch (error) {
-    console.error(`❌ Error processing message ID ${record.messageId}:`, error);
+    console.error(
+      `❌ Error processing message ID ${record.Sns.MessageId}:`,
+      error
+    );
     return {
-      recordId: record.messageId,
+      recordId: record.Sns.MessageId,
       status: "failure",
       error: error.message,
     };

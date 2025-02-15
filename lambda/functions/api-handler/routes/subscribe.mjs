@@ -1,5 +1,5 @@
-import { publishSNSEvent } from "/opt/shared/publishSNSEvent.mjs";
-import { createResponse } from "/opt/shared/createResponse.mjs";
+import { publishSNSEvent } from "/opt/shared/sns/publishSNSEvent.mjs";
+import { createResponse } from "/opt/shared/utils/createResponse.mjs";
 
 export const handleSubscribeRoute = async (event) => {
   try {
