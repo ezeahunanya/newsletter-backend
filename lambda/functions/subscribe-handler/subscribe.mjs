@@ -1,4 +1,5 @@
 import { generateUniqueToken } from "/opt/shared/utils/generateUniqueToken.mjs";
+import { queueSQSJob } from "/opt/shared/sqs/queueSQSJob.mjs";
 
 /**
  * Handles subscription logic based on the SQS message payload.
@@ -42,6 +43,11 @@ const processSubscription = async (client, email, eventType) => {
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // Token expiration in 24 hours.
 
     await insertVerificationToken(client, userId, tokenHash, expiresAt);
+
+    // ✅ Email queueing (inside the transaction)
+    const verificationUrl = `${process.env.FRONTEND_DOMAIN_URL}/verify-email?token=${token}`;
+
+    await queueSQSJob("verify-email", { email, verificationUrl });
 
     await client.query("COMMIT");
     console.log("✅ Subscription transaction committed successfully.");
