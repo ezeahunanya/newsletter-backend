@@ -16,7 +16,7 @@ export const getOutlookTransport = async () => {
       type: "OAuth2",
       user: process.env.OUTLOOK_SMTP_USER,
       accessToken,
-      clientId: process.env.OUTLOOK_CLIENT_ID,
+      clientId: secrets.OUTLOOK_CLIENT_ID,
       clientSecret: secrets.OUTLOOK_CLIENT_SECRET,
       refreshToken: secrets.OUTLOOK_REFRESH_TOKEN,
     },
