@@ -1,4 +1,4 @@
-import crypto from "crypto";
+import { hashToken } from "./hashToken.mjs";
 
 export const validateToken = async (
   client,
@@ -9,7 +9,7 @@ export const validateToken = async (
 ) => {
   console.log(`Starting token validation for token type: ${tokenType}`);
 
-  const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
+  const tokenHash = hashToken(token);
 
   const joinClause = subscriberTableName
     ? `JOIN ${subscriberTableName} s ON t.user_id = s.id`

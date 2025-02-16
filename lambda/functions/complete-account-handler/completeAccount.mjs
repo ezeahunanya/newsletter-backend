@@ -1,26 +1,7 @@
 import { validateToken } from "/opt/shared/utils/validateToken.mjs";
 import { createResponse } from "/opt/shared/utils/createResponse.mjs";
-import hashToken from "/opt/shared/utils/hashToken.mjs";
-
-// Utility function to log and return errors
-const handleError = (error, client) => {
-  console.error("❌ Error occurred:", error);
-  client
-    .query("ROLLBACK")
-    .catch((rollbackError) =>
-      console.error("❌ Failed to rollback transaction:", rollbackError)
-    );
-
-  const message = error.message.toLowerCase();
-  if (
-    message.includes("expired") ||
-    message.includes("used") ||
-    message.includes("not found")
-  ) {
-    return createResponse(400, { error: error.message });
-  }
-  return createResponse(500, { error: "Internal Server Error" });
-};
+import { hashToken } from "/opt/shared/utils/hashToken.mjs";
+import { handleError } from "/opt/shared/utils/handleError.mjs";
 
 export const handleCompleteAccount = async (client, event) => {
   const method = event.requestContext.http.method;
