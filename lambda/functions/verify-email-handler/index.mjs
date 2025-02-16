@@ -3,33 +3,40 @@ import { handleVerifyEmail } from "./verifyEmail.mjs";
 import { createResponse } from "/opt/shared/utils/createResponse.mjs";
 
 export const handler = async (event) => {
+  // Handle Lambda warm-up requests
   if (event.source === "aws.events") {
     console.log("🔄 Lambda warm-up request detected. Exiting early.");
     return;
   }
 
   let client;
+
   try {
-    const stage = event.requestContext.stage; // Get the stage ('dev', 'prod', etc.)
-    const rawPath = event.rawPath; // Includes the stage prefix (e.g., /dev/subscribe)
-    const normalizedPath = rawPath.replace(`/${stage}`, ""); // Strip the stage prefix
+    // Normalize the request path
+    const { requestContext: { stage } = {}, rawPath } = event;
+    const normalizedPath = rawPath.replace(`/${stage}`, "");
 
-    client = await connectToDatabase();
-
+    // Validate route
     if (normalizedPath !== "/verify-email") {
-      console.warn(`❌ Route ${normalizedPath} not found.`);
-      return createResponse(405, { error: "Not Found" });
+      console.warn(`❌ Route ${normalizedPath} not supported.`);
+      return createResponse(404, { error: "Not Found" });
     }
 
+    // Database connection
+    console.log("Connecting to the database...");
+    client = await connectToDatabase();
+
+    // Route handler
     return await handleVerifyEmail(client, event);
   } catch (error) {
-    console.error(error);
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: "Internal Server Error" }),
-    };
+    console.error("❌ Error in Lambda handler:", error);
+
+    // Consistent error response
+    return createResponse(500, { error: "Internal Server Error" });
   } finally {
+    // Ensure the database client is cleaned up
     if (client) {
+      console.log("🔒 Cleaning up database client.");
       client = null;
     }
   }
