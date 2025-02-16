@@ -1,4 +1,4 @@
-import { queueSQSJob } from "/opt/shared/sns/queueSQSJob.mjs";
+import { queueSQSJob } from "/opt/shared/sqs/queueSQSJob.mjs";
 import { createResponse } from "/opt/shared/utils/createResponse.mjs";
 
 export const handleSubscribeRoute = async (event) => {
