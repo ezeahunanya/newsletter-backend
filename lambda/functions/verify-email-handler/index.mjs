@@ -1,4 +1,4 @@
-import { connectToDatabase } from "/opt/db/connectToDatabase.mjs";
+import { connectToDatabase } from "/opt/shared/db/connectToDatabase.mjs";
 import { handleVerifyEmail } from "./verifyEmail.mjs";
 import { createResponse } from "/opt/shared/utils/createResponse.mjs";
 
