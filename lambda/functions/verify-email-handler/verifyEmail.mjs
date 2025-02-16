@@ -1,6 +1,6 @@
 import { generateUniqueToken } from "/opt/shared/utils/generateUniqueToken.mjs";
 import { validateToken } from "/opt/shared/utils/validateToken.mjs";
-import { queueEmailJob } from "/opt/shared/sqs/queueEmailJob.mjs";
+import { queueSQSJob } from "/opt/shared/sqs/queueSQSJob.mjs";
 import { encryptToken } from "/opt/shared/utils/encryption.mjs";
 import { createResponse } from "/opt/shared/utils/createResponse.mjs";
 import { hashToken } from "/opt/shared/utils/hashToken.mjs";
@@ -139,7 +139,7 @@ const queueWelcomeEmail = async (
   preferencesUrl
 ) => {
   console.log("Queuing welcome email...");
-  await queueEmailJob("process-welcome-email", {
+  await queueSQSJob("process-welcome-email", {
     email,
     accountCompletionUrl,
     preferencesUrl,
