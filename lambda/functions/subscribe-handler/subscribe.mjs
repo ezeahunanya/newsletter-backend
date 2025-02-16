@@ -1,5 +1,6 @@
 import { generateUniqueToken } from "/opt/shared/utils/generateUniqueToken.mjs";
 import { queueSQSJob } from "/opt/shared/sqs/queueSQSJob.mjs";
+import { publishSNSEvent } from "/opt/shared/sns/publishSNSEvent.mjs";
 
 /**
  * Handles subscription logic based on the SQS message payload.
@@ -29,16 +30,17 @@ export const handleSubscription = async (extractedVariables = {}, client) => {
  * @param {string} eventType - Type of event.
  */
 const processSubscription = async (client, email, eventType) => {
-  if (eventType !== "new-subscriber") {
+  if (eventType !== "subscribe") {
     console.warn(`⚠️ Unsupported event type: ${eventType}`);
     throw new Error("Unsupported event type.");
   }
 
+  let userId;
   try {
     await client.query("BEGIN");
     console.log("🔄 Database transaction started.");
 
-    const userId = await insertSubscriber(client, email);
+    userId = await insertSubscriber(client, email);
     const { token, tokenHash } = await generateUniqueToken(client);
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // Token expiration in 24 hours.
 
@@ -57,10 +59,12 @@ const processSubscription = async (client, email, eventType) => {
 
     if (error.code === "23505") {
       console.warn("⚠️ Duplicate email detected: Email already subscribed.");
-      return; // Skip further processing for duplicate emails.
+    } else {
+      throw error; // Ensure error bubbles up for proper handling.
     }
-    throw error; // Ensure error bubbles up for proper handling.
   }
+
+  await publishSNSEvent("new-subscriber", { userId, email });
 };
 
 /**

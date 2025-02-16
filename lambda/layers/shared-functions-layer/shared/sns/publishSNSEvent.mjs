@@ -19,8 +19,6 @@ const getSNSClient = () => {
 // 🔹 Map event types to their respective SNS topic ARNs
 const topicArnMap = {
   "new-subscriber": process.env.NEW_SUBSCRIBER_TOPIC_ARN,
-  "verify-email": process.env.VERIFY_EMAIL_TOPIC_ARN,
-  "regenerate-token": process.env.VERIFY_EMAIL_TOPIC_ARN,
 };
 
 /**
