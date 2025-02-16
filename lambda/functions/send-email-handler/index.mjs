@@ -6,15 +6,15 @@ import {
 import { processSingleMessage } from "/opt/shared/sqs/processSQSMessages.mjs";
 
 const EVENT_HANDLERS = {
-  "verify-email": {
+  "process-verification-email": {
     requiredVariables: ["email", "verificationUrl"],
     handler: sendVerificationEmail,
   },
-  "welcome-email": {
+  "process-welcome-email": {
     requiredVariables: ["email", "accountCompletionUrl", "preferencesUrl"],
     handler: sendWelcomeEmail,
   },
-  "regenerate-token": {
+  "process-token-regeneration-email": {
     requiredVariables: ["email", "linkUrl", "origin"],
     handler: sendRegeneratedTokenEmail,
   },

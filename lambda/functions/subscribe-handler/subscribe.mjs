@@ -47,7 +47,7 @@ const processSubscription = async (client, email, eventType) => {
     // ✅ Email queueing (inside the transaction)
     const verificationUrl = `${process.env.FRONTEND_DOMAIN_URL}/verify-email?token=${token}`;
 
-    await queueSQSJob("verify-email", { email, verificationUrl });
+    await queueSQSJob("process-verification-email", { email, verificationUrl });
 
     await client.query("COMMIT");
     console.log("✅ Subscription transaction committed successfully.");

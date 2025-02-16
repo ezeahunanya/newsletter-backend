@@ -1,5 +1,5 @@
 import { handleSubscription } from "./subscribe.mjs";
-import { processSNSMessages } from "/opt/shared/sns/processSNSMessages.mjs";
+import { processSQSMessages } from "/opt/shared/sqs/processSQSMessages.mjs";
 
 export const handler = async (event) => {
   if (event.source === "aws.events") {
@@ -11,14 +11,14 @@ export const handler = async (event) => {
   const useDatabase = true; // Explicitly define if the database is used.
 
   try {
-    await processSNSMessages(
+    await processSQSMessages(
       event,
       requiredVariables,
       handleSubscription,
       useDatabase
     );
-    console.log("✅ All SNS messages processed successfully.");
+    console.log("✅ All SQS messages processed successfully.");
   } catch (error) {
-    console.error("❌ Error during SNS message processing:", error);
+    console.error("❌ Error during SQS message processing:", error);
   }
 };

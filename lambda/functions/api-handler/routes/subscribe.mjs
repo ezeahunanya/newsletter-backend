@@ -1,4 +1,4 @@
-import { publishSNSEvent } from "/opt/shared/sns/publishSNSEvent.mjs";
+import { queueSQSJob } from "/opt/shared/sns/queueSQSJob.mjs";
 import { createResponse } from "/opt/shared/utils/createResponse.mjs";
 
 export const handleSubscribeRoute = async (event) => {
@@ -25,7 +25,7 @@ export const handleSubscribeRoute = async (event) => {
     }
 
     // Queue the job
-    await publishSNSEvent("new-subscriber", { email });
+    await queueSQSJob("subscribe", { email });
 
     return createResponse(202, { message: "Subscription request received" });
   } catch (error) {
