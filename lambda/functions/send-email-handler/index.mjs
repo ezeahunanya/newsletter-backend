@@ -21,6 +21,11 @@ const EVENT_HANDLERS = {
 };
 
 export const handler = async (event) => {
+  if (event.source === "aws.events") {
+    console.log("🔄 Lambda warm-up request detected. Exiting early.");
+    return;
+  }
+
   if (!event || !event.Records || !Array.isArray(event.Records)) {
     console.error("❌ Invalid SQS event: Missing or malformed Records array.");
     throw new Error("Invalid SQS event: Missing or malformed Records array.");

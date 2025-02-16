@@ -3,11 +3,9 @@ import { createResponse } from "/opt/shared/utils/createResponse.mjs";
 
 export const handler = async (event) => {
   // Detect EventBridge Scheduler warm-up pings
-  if (event.source === "aws.scheduler") {
-    console.log(
-      "Warm-up ping received from EventBridge Scheduler. Keeping Lambda warm."
-    );
-    return createResponse(200, { message: "Lambda warmed up" });
+  if (event.source === "aws.events") {
+    console.log("🔄 Lambda warm-up request detected. Exiting early.");
+    return;
   }
 
   // Validate the event structure
