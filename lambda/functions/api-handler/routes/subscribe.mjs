@@ -27,7 +27,7 @@ export const handleSubscribeRoute = async (event) => {
     // Queue the job
     await queueSQSJob("subscribe", { email });
 
-    return createResponse(202, { message: "Subscription request received" });
+    return createResponse(202, { message: "Please verify your email." });
   } catch (error) {
     console.error("❌ Error handling /subscribe route:", error);
     return createResponse(500, { error: "Internal Server Error" });
