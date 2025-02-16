@@ -3,25 +3,20 @@ import { createResponse } from "/opt/shared/utils/createResponse.mjs";
 
 export const handleSubscribeRoute = async (event) => {
   try {
-    // Parse and validate the request body
-    const { body } = event;
+    const method = event.requestContext.http.method;
+    console.log(`Received ${method} request for subscription.`);
 
-    let requestBody;
-    try {
-      requestBody = JSON.parse(body);
-    } catch (error) {
-      console.error("❌ Invalid JSON in request body:", error);
-      return createResponse(400, { error: "Invalid JSON body" });
+    if (method !== "POST") {
+      console.warn(`❌ Method ${method} not allowed.`);
+      return createResponse(405, { error: "Method Not Allowed" });
     }
 
-    const { email } = requestBody;
+    // Parse the request body (assuming it's valid JSON from API Gateway)
+    const { email } = JSON.parse(event.body);
 
     if (!email) {
       console.error("❌ Missing email in request body.");
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ error: "Email is required" }),
-      };
+      return createResponse(400, { error: "Email is required" });
     }
 
     // Queue the job
